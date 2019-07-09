@@ -5,13 +5,7 @@
 #include <avr/power.h>
 #include <avr/interrupt.h>
 #include <EEPROM.h>
-
-
-
 int n = 126;                         //количество ячеек памяти в EEPROM attiny25 - 128; attiny45 - 256; attiny85 - 512 
-
-class eeprom{
-  public:
 
   void clear(){
     for (int i =0; i <= n; i++){
@@ -54,35 +48,31 @@ class eeprom{
       EEPROM[zero - 1]++;
     }
   }
-};
-eeprom a;
+
 
 ISR (WDT_vect) {                      //обработка прерывания watchdog
-  if (a.checkCounter(4) == true){
-    ADCSRA = (1 << ADEN) ;              //включение АЦП (в POWER_DOWN_MODE выключен)
-    digitalWrite(0, HIGH);
-    if ((analogRead(3) < 300) && (analogRead(1) > 600)){
-      digitalWrite(4, HIGH);
-      _delay_ms(100);
-      digitalWrite(4, LOW);  
-    }
-    ADCSRA = (0 << ADEN) ;            //выключение АЦП(потребляет о.3 мА)
-    digitalWrite(0,LOW);
-    WDTCR |= (1 << WDIE);             // разрешаем прерывания по watchdog. Иначе будет ресет.
+  if (EEPROM[100] == 1){
+  ADCSRA = (1 << ADEN) ;              //включение АЦП (в POWER_DOWN_MODE выключен)
+  digitalWrite(4, HIGH);
+  _delay_ms(100);
+  digitalWrite(4, LOW);  
+  ADCSRA = (0 << ADEN) ;            //выключение АЦП(потребляет о.3 мА)
+  WDTCR |= (1 << WDIE);             // разрешаем прерывания по watchdog. Иначе будет ресет.
   }
-  a.counterPlus();
+ 
 }
 
 int main(void)
 {
-    //a.clear();
+  EEPROM[100] = 1;
+    //clear();
     pinMode(0, OUTPUT);
     pinMode(3, INPUT);
     pinMode(4, OUTPUT);
     pinMode(1, INPUT);
     digitalWrite(0, LOW);
     wdt_reset();          
-    wdt_enable(WDTO_1S);            //watch_dog инициализация 8s timer
+    wdt_enable(WDTO_2S);            //watch_dog инициализация 8s timer
     
     WDTCR |= (1 << WDIE);           // разрешаем прерывания по ватчдогу. Иначе будет резет.
     sei();                          //установить флаг глобального прерывания http://www.gaw.ru/html.cgi/txt/doc/micros/avr/asm/sei.htm
