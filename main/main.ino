@@ -1,3 +1,51 @@
+inline void SetupPins(){
+  //         x              - Биты отвечают за назначение пинов
+  //         |x             - 1 - OUTPUT; 0 - INPUT
+  //         ||DDB5         - PB5
+  //         |||DDB4        - PB4
+  //         ||||DDB3       - PB3
+  //         |||||DDB2      - PB2
+  //         ||||||DDB1     - PB1
+  //         |||||||DDB0    - PB0
+  //         ||||||||
+  DDRB = 0b00111010;
+}
+
+/*inline void SetupWatchdog(){
+
+  // WDP3  WDP2  WDP1  WDP0 - отвечают за время срабатывания watchdog
+  //  0      0     0     0  - 16ms
+  //  0      1     0     0  - 25ms
+  //  0      1     1     0  - 1s
+  //  0      1     1     1  - 2s
+  //  1      0     0     0  - 4s
+  //  1      0     0     1  - 8s - maximum
+  
+  // WDE  WDIE  - отвечают за режимы watchdog
+  //  0    0    - none
+  //  0    1    - interrupt mode
+  //  1    0    - reset mode
+  //  1    1    - interrupt reset mode
+
+  //          WDIF            - устнавливается 1 когда вотчдог таймер срабатывает (в режиме прерываний)
+  //          |WDIE           - меняет режимы 
+  //          ||WDP3          - 
+  //          |||WDCE         - необходимо установить еденицу когда WDE - 0  
+  //          ||||WDE         - включение watchdog
+  //          |||||WDP2       - 
+  //          ||||||WDP1      - 
+  //          |||||||WDP0     - 
+  //          ||||||||
+  //WDTCR = 0b00000000;
+  
+  WDTCR |= (0 << WDIE);
+  WDTCR |= (1 << WDE);
+  WDTCR |= (1 << WDP3);
+  WDTCR |= (0 << WDP2);
+  WDTCR |= (0 << WDP1);
+  WDTCR |= (0 << WDP0);
+  
+}*/
 #include <avr/io.h>
 #include <avr/wdt.h>
 #include <util/delay.h>
