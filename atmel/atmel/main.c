@@ -14,15 +14,21 @@ const int n = 128;
 
 class eeprom{
 	public:
-
+	int Eread(int i){
+		return eeprom_read_byte((uint8_t*)i);
+	}
+	void Ewrite(int addr,  int inf){
+		eeprom_write_byte((uint8_t*) addr, (uint8_t*) inf) ;
+	}
 	void clear(){
 		for (int i =0; i <= n; i++){
-			
+			Ewrite(i, 0);
 		}
 	}
 	int searchZero(){
+		int inf = 0;
 		for(int i = 0; i <= n; i++){
-			if (EEPROM[i] == 0){
+			if (Eread(i) == 0){
 				return i;
 			}
 		}
@@ -31,32 +37,33 @@ class eeprom{
 	int returnCounter(){
 		int zero = searchZero();
 		if (zero == 0){
-			return EEPROM[n];
+			return Eread(n);
 		}
-		return EEPROM[zero - 1];
+		return Eread(zero - 1);
 	}
 	bool checkCounter(int maxi = 10){
 		if (returnCounter() == maxi){
 			if (searchZero() == n){
 				int zero = searchZero();
-				EEPROM[0] = 0;
-				EEPROM[zero] = 1;
+				Ewrite(0, 0);
+				Ewrite(zero, 1);
 				} else {
 				int zero = searchZero();
-				EEPROM[zero + 1] = 0;
-				EEPROM[zero] = 1;
+				Ewrite(zero + 1, 0);
+				Ewrite(zero, 1);
 			}
 		}
 	}
 	void counterPlus(){
 		int zero = searchZero();
 		if (zero == 0){
-			EEPROM[n]++;
+			Ewrite(n, Eread(n) + 1);
 			} else{
-			EEPROM[zero - 1]++;
+			Ewrite(zero - 1, Eread(zero - 1) + 1);
 		}
 	}
 };
+
 
 inline void SetupADCSRA(){
 	//         ADEN           - Подать питание на АЦП
@@ -199,14 +206,18 @@ inline void blink(){
 }
 
 
+eeprom a;
 
 int main(void)
 {
 	SetupPins();
 	SetupWatchdog();
 	SetupSleep();
-	ReadADC(1);
-  	blink();
+	a.checkCounter(4);    //сбрасываем таймер при переполнении 
+  	if (a.returnCounter() == 4){
+		blink();
+	  }
+	a.counterPlus();
 	while (1) {
 		Sleep();
     }

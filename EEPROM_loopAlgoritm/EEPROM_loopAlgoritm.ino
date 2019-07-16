@@ -2,15 +2,15 @@
 
 const  int n = 10; //                        //количество ячеек памяти в EEPROM attiny25 - 128; attiny45 - 256; attiny85 - 512 
 
-class eeprom{
-  public:
-  
   int Eread(int i){
     return eeprom_read_byte((uint8_t*)i);
   }
   void Ewrite(int addr,  int inf){
     eeprom_write_byte((uint8_t*) addr, (uint8_t*) inf) ;
   }
+
+class eeprom{
+  public:
   void clear(){
     for (int i =0; i <= n; i++){
       Ewrite(i, 0);
@@ -32,7 +32,7 @@ class eeprom{
     }
       return Eread(zero - 1);
   }
-  bool checkCounter(int maxi = 10){
+  void checkCounter(int maxi = 10){
     if (returnCounter() == maxi){
       if (searchZero() == n){
         int zero = searchZero();
@@ -72,13 +72,9 @@ void setup() {
   
 for (int i = 0; i <= 1000; i++){
   printEEPROM(n);
-  bool o = a.checkCounter(4);
-  if (o){
-   Serial.println(i);
-  }
+  a.checkCounter(4);
   a.counterPlus();
 }
- printEEPROM(n);
 }
 
 void loop() {
