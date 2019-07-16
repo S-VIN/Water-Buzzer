@@ -1,18 +1,25 @@
-#include <EEPROM.h>
+#include <avr/eeprom.h>
 
-  int n = 10; //                        //количество ячеек памяти в EEPROM attiny25 - 128; attiny45 - 256; attiny85 - 512 
+const  int n = 10; //                        //количество ячеек памяти в EEPROM attiny25 - 128; attiny45 - 256; attiny85 - 512 
 
 class eeprom{
   public:
-
+  
+  int Eread(int i){
+    return eeprom_read_byte((uint8_t*)i);
+  }
+  void Ewrite(int addr,  int inf){
+    eeprom_write_byte((uint8_t*) addr, (uint8_t*) inf) ;
+  }
   void clear(){
     for (int i =0; i <= n; i++){
-     EEPROM[i] = 0;
+      Ewrite(i, 0);
     }
   }
   int searchZero(){
+    int inf = 0;
     for(int i = 0; i <= n; i++){
-      if (EEPROM[i] == 0){
+      if (Eread(i) == 0){
         return i;
       }
     }
@@ -21,37 +28,36 @@ class eeprom{
   int returnCounter(){
     int zero = searchZero();
     if (zero == 0){
-      return EEPROM[n];
+      return Eread(n);
     }
-    return EEPROM[zero - 1];
+      return Eread(zero - 1);
   }
   bool checkCounter(int maxi = 10){
     if (returnCounter() == maxi){
       if (searchZero() == n){
         int zero = searchZero();
-        EEPROM[0] = 0;
-        EEPROM[zero] = 1;
+        Ewrite(0, 0);
+        Ewrite(zero, 1);
       } else {
         int zero = searchZero();
-        EEPROM[zero + 1] = 0;
-        EEPROM[zero] = 1;
+        Ewrite(zero + 1, 0);
+        Ewrite(zero, 1);
       }
-      return true;
     }
-    return false;
   }
   void counterPlus(){
     int zero = searchZero();
     if (zero == 0){
-      EEPROM[n]++;
+      Ewrite(n, Eread(n) + 1);
     } else{
-      EEPROM[zero - 1]++;
+      Ewrite(zero - 1, Eread(zero - 1) + 1);
     }
   }
 };
+
 void printEEPROM(int count){
   for (int i = 0; i <= count; i++){
-    Serial.print(EEPROM[i]);
+    Serial.print(Eread(i));
     Serial.print(" ");
   }
   Serial.println(" ");
@@ -61,12 +67,10 @@ void setup() {
  
   a.clear();
   Serial.begin(9600);
-  //printEEPROM(n);
-  //Serial.println(returnCounter());
-  //EEPROM[9] = 10;
- // printEEPROM(n);
-  //Serial.println(returnCounter());
-for (int i = 0; i <= 10; i++){
+  printEEPROM(n);
+  
+  
+for (int i = 0; i <= 1000; i++){
   printEEPROM(n);
   bool o = a.checkCounter(4);
   if (o){

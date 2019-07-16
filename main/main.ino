@@ -58,52 +58,7 @@ inline void SetupPins(){
 
 int n = 126;                         //количество ячеек памяти в EEPROM attiny25 - 128; attiny45 - 256; attiny85 - 512 
 
-class eeprom{
-  public:
 
-  void clear(){
-    for (int i =0; i <= n; i++){
-     EEPROM[i] = 0;
-    }
-  }
-  int searchZero(){
-    for(int i = 0; i <= n; i++){
-      if (EEPROM[i] == 0){
-        return i;
-      }
-    }
-    return 0;
-  }
-  int returnCounter(){
-    int zero = searchZero();
-    if (zero == 0){
-      return EEPROM[n];
-    }
-    return EEPROM[zero - 1];
-  }
-  bool checkCounter(int maxi = 10){
-    if (returnCounter() == maxi){
-      if (searchZero() == n){
-        int zero = searchZero();
-        EEPROM[0] = 0;
-        EEPROM[zero] = 1;
-      } else {
-        int zero = searchZero();
-        EEPROM[zero + 1] = 0;
-        EEPROM[zero] = 1;
-      }
-    }
-  }
-  void counterPlus(){
-    int zero = searchZero();
-    if (zero == 0){
-      EEPROM[n]++;
-    } else{
-      EEPROM[zero - 1]++;
-    }
-  }
-};
-eeprom a;
 
 ISR (WDT_vect) {                      //обработка прерывания watchdog
   if (EEPROM[0] >= 4){

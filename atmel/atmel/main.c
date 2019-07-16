@@ -2,7 +2,9 @@
 
 #include <avr/io.h>
 #include <util/delay.h>
+#include <avr/eeprom.h>
 
+const int n = 128;
 //PB0 - сигнал с датчика влажности
 //PB1 - питание датчика воды
 //PB2 - сигнал с датчика света
@@ -10,7 +12,66 @@
 //PB4 - сигнал на пищалку
 //PB5 - ресет пин
 
-int ReadADC(int number_of_port){
+class eeprom{
+	public:
+
+	void clear(){
+		for (int i =0; i <= n; i++){
+			
+		}
+	}
+	int searchZero(){
+		for(int i = 0; i <= n; i++){
+			if (EEPROM[i] == 0){
+				return i;
+			}
+		}
+		return 0;
+	}
+	int returnCounter(){
+		int zero = searchZero();
+		if (zero == 0){
+			return EEPROM[n];
+		}
+		return EEPROM[zero - 1];
+	}
+	bool checkCounter(int maxi = 10){
+		if (returnCounter() == maxi){
+			if (searchZero() == n){
+				int zero = searchZero();
+				EEPROM[0] = 0;
+				EEPROM[zero] = 1;
+				} else {
+				int zero = searchZero();
+				EEPROM[zero + 1] = 0;
+				EEPROM[zero] = 1;
+			}
+		}
+	}
+	void counterPlus(){
+		int zero = searchZero();
+		if (zero == 0){
+			EEPROM[n]++;
+			} else{
+			EEPROM[zero - 1]++;
+		}
+	}
+};
+
+inline void SetupADCSRA(){
+	//         ADEN           - Подать питание на АЦП
+	//         |ADSC          - Запуск АЦП
+	//         ||ADATE        - Оцифровка по срабатываению триггера ADTS[2:0]
+	//         |||ADIF        - флаг прерывания от компаратора
+	//         ||||ADIE       - разрешение прерывания от компаратора
+	//         |||||ADPS2     - настройка пределителя (влияет на время измерения)
+	//         ||||||ADPS1    -
+	//         |||||||ADPS0   -
+	//         ||||||||
+	ADCSRA = 0b10000111;
+}
+
+inline void SetupADMUX(int src){
 	// таблица 1
 	//  REFS2  REFS1  REFS0  - настраивает источник опорного напряжения
 	//    x      0      0    - VCC опорное напряжение
@@ -19,7 +80,7 @@ int ReadADC(int number_of_port){
 	//    0      1      1    - зарезервировано
 	//    1      1      0    - внутреннее 2.56В опорное напряжение без конденсатора
 	//    1      1      1    - внутреннее 2.56В опорное напряжение с конденсатором на пине AREF
-	
+
 	// таблица 2
 	//  MUX3 MUX2 MUX1 MUX0 -  биты отвечающие за мультиплексор (к чему подключен АЦП)
 	//    0    0    0    0  - PB5
@@ -39,82 +100,26 @@ int ReadADC(int number_of_port){
 	//    1    1    0    1  - GND
 	//    1    1    1    0  - N/A
 	//    1    1    1    1  - ADC4
-	
-	//           REFS1           - таблица 1
-	//           |REFS0          - таблица 1
-	//           ||ADLAR         - бит отвечающий за порядок записи битов результата в регистры (0 - 10 бит; 1 - 8 бит)
-	//           |||REFS2        - таблица 1
-	//           ||||MUX3        - таблица 2
-	//           |||||MUX2       - таблица 2
-	//           ||||||MUX1      - таблица 2
-	//           |||||||MUX0     - таблица 2
-	//           ||||||||
-	// ADMUX = 0b00000000;
-	ADMUX |= (0 << REFS1);
-	ADMUX |= (0 << REFS0);
-	ADMUX |= (0 << REFS1);
-	ADMUX |= (0 << REFS1);
-	ADMUX |= (1 << ADLAR);
-	
-	switch (number_of_port) {
-		case 5:
-			ADMUX |= (0 << MUX3);
-			ADMUX |= (0 << MUX2);
-			ADMUX |= (0 << MUX1);
-			ADMUX |= (0 << MUX0);
-		break;
-		
-		case 2:
-			ADMUX |= (0 << MUX3);
-			ADMUX |= (0 << MUX2);
-			ADMUX |= (0 << MUX1);
-			ADMUX |= (1 << MUX0);
-		break;
-		
-		case 4:
-			ADMUX |= (0 << MUX3);
-			ADMUX |= (0 << MUX2);
-			ADMUX |= (1 << MUX1);
-			ADMUX |= (0 << MUX0);
-		break;
-		
-		case 3:
-			ADMUX |= (0 << MUX3);
-			ADMUX |= (0 << MUX2);
-			ADMUX |= (1 << MUX1);
-			ADMUX |= (1 << MUX0);
-		break;
-		
-		default:
-			ADMUX |= (1 << MUX3);
-			ADMUX |= (1 << MUX2);
-			ADMUX |= (0 << MUX1);
-			ADMUX |= (1 << MUX0);
-		break;
-	}
-	
-	
-	
-	
-	//           ADEN           - Подать питание на АЦП
-	//           |ADSC          - Запуск АЦП
-	//           ||ADATE        - Оцифровка по срабатываению триггера ADTS[2:0]
-	//           |||ADIF        - флаг прерывания от компаратора
-	//           ||||ADIE       - разрешение прерывания от компаратора
-	//           |||||ADPS2     - 
-	//           ||||||ADPS1    - 
-	//           |||||||ADPS0   - 
-	//           ||||||||
-	//ADCSRA = 0b10000111;
-	ADCSRA = 0b10000111;
 
-	ADCSRA |= (1 << ADSC);
+	//        REFS1           - таблица 1
+	//        |REFS0          - таблица 1
+	//        ||ADLAR         - бит отвечающий за порядок записи битов результата в регистры (0 - 10 бит; 1 - 8 бит)
+	//        |||REFS2        - таблица 1
+	//        ||||MUX3        - таблица 2
+	//        |||||MUX2       - таблица 2
+	//        ||||||MUX1      - таблица 2
+	//        |||||||MUX0     - таблица 2
+	//        ||||||||
+	ADMUX = 0b00100000 | (src & 0b00001111);
+}
 	
-	while(ADCSRA & (1 << ADSC));
-
-	int result = ADCH;
-	
-	ADCSRA |= (0 << ADEN);
+int ReadADC(int number_of_port){
+	SetupADMUX(number_of_port);
+	SetupADCSRA();
+	ADCSRA |= (1 << ADSC);          // начали измерение
+	while(ADCSRA & (1 << ADSC));    // ждем когда помереет
+	int result = ADCH;              // отбросили шумные незначащие биты
+	ADCSRA = 0b00000111;            // выключили АЦП
 	return result;
 }
 
@@ -148,24 +153,16 @@ inline void SetupWatchdog(){
 	//  1    0    - reset mode
 	//  1    1    - interrupt reset mode
 
-	//          WDIF            - устнавливается 1 когда вотчдог таймер срабатывает (в режиме прерываний)
-	//          |WDIE           - таблица 2   меняет режимы
-	//          ||WDP3          - таблица 1
-	//          |||WDCE         - необходимо установить еденицу когда WDE - 0
-	//          ||||WDE         - включение watchdog
-	//          |||||WDP2       - таблица 1
-	//          ||||||WDP1      - таблица 1
-	//          |||||||WDP0     - таблица 1
-	//          ||||||||
-	//WDTCR = 0b00000000;
-	
-	WDTCR |= (0 << WDIE); 
-	WDTCR |= (1 << WDE);
-	WDTCR |= (1 << WDP3);
-	WDTCR |= (0 << WDP2);
-	WDTCR |= (0 << WDP1);
-	WDTCR |= (0 << WDP0);
-	
+	//        WDIF            - устнавливается 1 когда вотчдог таймер срабатывает (в режиме прерываний)
+	//        |WDIE           - таблица 2   меняет режимы
+	//        ||WDP3          - таблица 1
+	//        |||WDCE         - необходимо установить еденицу когда WDE - 0
+	//        ||||WDE         - включение watchdog
+	//        |||||WDP2       - таблица 1
+	//        ||||||WDP1      - таблица 1
+	//        |||||||WDP0     - таблица 1
+	//        ||||||||
+	WDTCR = 0b00001111;
 }
 
 inline void SetupSleep(){
@@ -177,18 +174,16 @@ inline void SetupSleep(){
 	//  1     1    - reserved  (не лезь)
 	
 	
-	//          BODS              - не поддерживается (0 по умолчанию)
-	//          |PUD              - хз что, нет в даташите
-	//          ||SE              - выключатель режима сна (установи 1 чтоб заснуть)
-	//          |||SM1            - таблица 1
-	//          ||||SM0           - таблица 1
-	//          |||||BODSE        - не поддерживается (0 по умолчанию)
-	//          ||||||ISC01       - что-то связанное с прерываниями (к делу не относится)
-	//          |||||||ISC00      - что-то связанное с прерываниями (к делу не относится)
-	//          ||||||||
-	//MCUCR = 0b00000000;
-	MCUCR |= (1 << SM1);
-	MCUCR |= (0 << SM0);
+	//        BODS              - не поддерживается (0 по умолчанию)
+	//        |PUD              - хз что, нет в даташите
+	//        ||SE              - выключатель режима сна (установи 1 чтоб заснуть)
+	//        |||SM1            - таблица 1
+	//        ||||SM0           - таблица 1
+	//        |||||BODSE        - не поддерживается (0 по умолчанию)
+	//        ||||||ISC01       - что-то связанное с прерываниями (к делу не относится)
+	//        |||||||ISC00      - что-то связанное с прерываниями (к делу не относится)
+	//        ||||||||
+	MCUCR = 0b00010000;
 }
 
 inline void Sleep(){
@@ -210,6 +205,7 @@ int main(void)
 	SetupPins();
 	SetupWatchdog();
 	SetupSleep();
+	ReadADC(1);
   	blink();
 	while (1) {
 		Sleep();
