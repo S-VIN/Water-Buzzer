@@ -9,8 +9,9 @@
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 
-const size_t rBufSize = 128;
-const size_t rBufOffs = 0;
+const uint8_t rBufSize = 128;
+const uint8_t rBufOffs = 0;
+const uint8_t maxCntVal = 4;
 //PB0 - сигнал с датчика влажности
 //PB1 - питание датчика воды
 //PB2 - сигнал с датчика света
@@ -19,16 +20,16 @@ const size_t rBufOffs = 0;
 //PB5 - ресет пин
 
 
-size_t GetEIndex (int16_t idx) {
-    return (size_t)((idx + (int16_t)rBufSize) % rBufSize);
+uint8_t GetEIndex (int16_t idx) {
+    return (uint8_t)((idx + (int16_t)rBufSize) % rBufSize);
 }
 
-uint8_t ERead(size_t idx){
-    return eeprom_read_byte((size_t*)(rBufOffs + idx));
+uint8_t ERead(uint8_t idx){
+    return eeprom_read_byte((uint8_t*)(rBufOffs + idx));
 }
 
-void EWrite(size_t idx,  uint8_t data){
-    eeprom_write_byte((size_t*)(idx + rBufOffs), data) ;
+void EWrite(uint8_t idx,  uint8_t data){
+    eeprom_write_byte((uint8_t*)(idx + rBufOffs), data) ;
 }
 
 void EClear(){
@@ -37,7 +38,7 @@ void EClear(){
     }
 }
 
-void InitHead(size_t idx) {
+void InitHead(uint8_t idx) {
     EWrite(idx, 0);
     EWrite(GetEIndex(idx - 1), 1);
 }
@@ -52,13 +53,13 @@ int GetHeadIndex() {
     return 0;
 }
 
-size_t GetDataIndex() {
-    size_t hIdx = GetHeadIndex();
+uint8_t GetDataIndex() {
+    uint8_t hIdx = GetHeadIndex();
     return GetEIndex(hIdx - 1);
 }
 
 uint8_t CounterPlus(){
-    size_t dIdx = GetDataIndex();
+    uint8_t dIdx = GetDataIndex();
     uint8_t data = ERead(dIdx) + 1;
     if (data > maxCntVal) {
         InitHead(GetHeadIndex() + 1);
@@ -188,7 +189,7 @@ int main(void)
 {
 	SetupPins();
 	sei();
-	clear();
+	EClear();
 	SetupWatchdog();
 	ADCSRA = 0b00000111;
 	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
