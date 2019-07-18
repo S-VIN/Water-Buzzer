@@ -9,7 +9,8 @@
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 
-const int n = 128;
+const size_t rBufSize = 128;
+const size_t rBufOffs = 0;
 //PB0 - сигнал с датчика влажности
 //PB1 - питание датчика воды
 //PB2 - сигнал с датчика света
@@ -17,59 +18,55 @@ const int n = 128;
 //PB4 - сигнал на пищалку
 //PB5 - ресет пин
 
-int Eread(int i){
-	return eeprom_read_byte((uint8_t*)i);
+
+size_t GetEIndex (int16_t idx) {
+    return (size_t)((idx + (int16_t)rBufSize) % rBufSize);
 }
 
-void Ewrite(int addr,  int inf){
-	eeprom_write_byte((uint8_t*) addr, (uint8_t*) inf) ;
+uint8_t ERead(size_t idx){
+    return eeprom_read_byte((size_t*)(rBufOffs + idx));
 }
 
-void clear(){
-	for (int i =0; i <= n; i++){
-		Ewrite(i, 0);
-	}
+void EWrite(size_t idx,  uint8_t data){
+    eeprom_write_byte((size_t*)(idx + rBufOffs), data) ;
 }
 
-int searchZero(){
-	int inf = 0;
-	for(int i = 0; i <= n; i++){
-		if (Eread(i) == 0){
-			return i;
-		}
-	}
-	return 0;
+void EClear(){
+    for (int i = 0; i < rBufSize; i++){
+        EWrite(GetEIndex(i), 0);
+    }
 }
 
-int returnCounter(){
-	int zero = searchZero();
-	if (zero == 0){
-		return Eread(n);
-	}
-	return Eread(zero - 1);
+void InitHead(size_t idx) {
+    EWrite(idx, 0);
+    EWrite(GetEIndex(idx - 1), 1);
 }
 
-void checkCounter(int maxi){
-	if (returnCounter() == maxi){
-		if (searchZero() == n){
-			int zero = searchZero();
-			Ewrite(0, 0);
-			Ewrite(zero, 1);
-			} else {
-			int zero = searchZero();
-			Ewrite(zero + 1, 0);
-			Ewrite(zero, 1);
-		}
-	}
+int GetHeadIndex() {
+    for(int i = 0; i < rBufSize; i++){
+        if (ERead(i) == 0){
+            return i;
+        }
+    }
+    InitHead(0);
+    return 0;
 }
 
-void counterPlus(){
-	int zero = searchZero();
-	if (zero == 0){
-		Ewrite(n, Eread(n) + 1);
-		} else{
-		Ewrite(zero - 1, Eread(zero - 1) + 1);
-	}
+size_t GetDataIndex() {
+    size_t hIdx = GetHeadIndex();
+    return GetEIndex(hIdx - 1);
+}
+
+uint8_t CounterPlus(){
+    size_t dIdx = GetDataIndex();
+    uint8_t data = ERead(dIdx) + 1;
+    if (data > maxCntVal) {
+        InitHead(GetHeadIndex() + 1);
+        return 1;
+    } else {
+        EWrite(dIdx, data);
+    }
+    return data;
 }
 
 inline void SetupADCSRA(){
