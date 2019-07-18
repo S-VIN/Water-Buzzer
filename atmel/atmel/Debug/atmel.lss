@@ -3,49 +3,49 @@ atmel.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .text         00000090  00000000  00000000  00000054  2**1
+  0 .text         000000f4  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .data         00000000  00800060  00800060  000000e4  2**0
+  1 .data         00000000  00800060  00800060  00000148  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  2 .comment      00000030  00000000  00000000  000000e4  2**0
+  2 .comment      00000030  00000000  00000000  00000148  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000114  2**2
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000178  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000028  00000000  00000000  00000150  2**0
+  4 .debug_aranges 00000088  00000000  00000000  000001b8  2**3
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   0000067e  00000000  00000000  00000178  2**0
+  5 .debug_info   00000be6  00000000  00000000  00000240  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 0000054b  00000000  00000000  000007f6  2**0
+  6 .debug_abbrev 00000662  00000000  00000000  00000e26  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000275  00000000  00000000  00000d41  2**0
+  7 .debug_line   000004c6  00000000  00000000  00001488  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000034  00000000  00000000  00000fb8  2**2
+  8 .debug_frame  00000100  00000000  00000000  00001950  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    0000037b  00000000  00000000  00000fec  2**0
+  9 .debug_str    000003f3  00000000  00000000  00001a50  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    000000b6  00000000  00000000  00001367  2**0
+ 10 .debug_loc    0000053d  00000000  00000000  00001e43  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000018  00000000  00000000  0000141d  2**0
+ 11 .debug_ranges 00000070  00000000  00000000  00002380  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
 
 00000000 <__vectors>:
    0:	0e c0       	rjmp	.+28     	; 0x1e <__ctors_end>
-   2:	15 c0       	rjmp	.+42     	; 0x2e <__bad_interrupt>
-   4:	14 c0       	rjmp	.+40     	; 0x2e <__bad_interrupt>
-   6:	13 c0       	rjmp	.+38     	; 0x2e <__bad_interrupt>
-   8:	12 c0       	rjmp	.+36     	; 0x2e <__bad_interrupt>
-   a:	11 c0       	rjmp	.+34     	; 0x2e <__bad_interrupt>
-   c:	10 c0       	rjmp	.+32     	; 0x2e <__bad_interrupt>
-   e:	0f c0       	rjmp	.+30     	; 0x2e <__bad_interrupt>
-  10:	0e c0       	rjmp	.+28     	; 0x2e <__bad_interrupt>
-  12:	0d c0       	rjmp	.+26     	; 0x2e <__bad_interrupt>
-  14:	0c c0       	rjmp	.+24     	; 0x2e <__bad_interrupt>
-  16:	0b c0       	rjmp	.+22     	; 0x2e <__bad_interrupt>
-  18:	0a c0       	rjmp	.+20     	; 0x2e <__bad_interrupt>
-  1a:	09 c0       	rjmp	.+18     	; 0x2e <__bad_interrupt>
-  1c:	08 c0       	rjmp	.+16     	; 0x2e <__bad_interrupt>
+   2:	20 c0       	rjmp	.+64     	; 0x44 <__bad_interrupt>
+   4:	1f c0       	rjmp	.+62     	; 0x44 <__bad_interrupt>
+   6:	1e c0       	rjmp	.+60     	; 0x44 <__bad_interrupt>
+   8:	1d c0       	rjmp	.+58     	; 0x44 <__bad_interrupt>
+   a:	1c c0       	rjmp	.+56     	; 0x44 <__bad_interrupt>
+   c:	1b c0       	rjmp	.+54     	; 0x44 <__bad_interrupt>
+   e:	1a c0       	rjmp	.+52     	; 0x44 <__bad_interrupt>
+  10:	19 c0       	rjmp	.+50     	; 0x44 <__bad_interrupt>
+  12:	18 c0       	rjmp	.+48     	; 0x44 <__bad_interrupt>
+  14:	17 c0       	rjmp	.+46     	; 0x44 <__bad_interrupt>
+  16:	16 c0       	rjmp	.+44     	; 0x44 <__bad_interrupt>
+  18:	24 c0       	rjmp	.+72     	; 0x62 <__vector_12>
+  1a:	14 c0       	rjmp	.+40     	; 0x44 <__bad_interrupt>
+  1c:	13 c0       	rjmp	.+38     	; 0x44 <__bad_interrupt>
 
 0000001e <__ctors_end>:
   1e:	11 24       	eor	r1, r1
@@ -54,131 +54,186 @@ Disassembly of section .text:
   24:	d1 e0       	ldi	r29, 0x01	; 1
   26:	de bf       	out	0x3e, r29	; 62
   28:	cd bf       	out	0x3d, r28	; 61
-  2a:	0f d0       	rcall	.+30     	; 0x4a <main>
-  2c:	2f c0       	rjmp	.+94     	; 0x8c <_exit>
 
-0000002e <__bad_interrupt>:
-  2e:	e8 cf       	rjmp	.-48     	; 0x0 <__vectors>
+0000002a <__do_copy_data>:
+  2a:	10 e0       	ldi	r17, 0x00	; 0
+  2c:	a0 e6       	ldi	r26, 0x60	; 96
+  2e:	b0 e0       	ldi	r27, 0x00	; 0
+  30:	e4 ef       	ldi	r30, 0xF4	; 244
+  32:	f0 e0       	ldi	r31, 0x00	; 0
+  34:	02 c0       	rjmp	.+4      	; 0x3a <__do_copy_data+0x10>
+  36:	05 90       	lpm	r0, Z+
+  38:	0d 92       	st	X+, r0
+  3a:	a0 36       	cpi	r26, 0x60	; 96
+  3c:	b1 07       	cpc	r27, r17
+  3e:	d9 f7       	brne	.-10     	; 0x36 <__do_copy_data+0xc>
+  40:	35 d0       	rcall	.+106    	; 0xac <main>
+  42:	56 c0       	rjmp	.+172    	; 0xf0 <_exit>
 
-00000030 <ReadADC>:
-	//        ||||MUX3        - таблица 2
-	//        |||||MUX2       - таблица 2
-	//        ||||||MUX1      - таблица 2
-	//        |||||||MUX0     - таблица 2
-	//        ||||||||
-	ADMUX = 0b00100000 | (src & 0b00001111);
-  30:	8f 70       	andi	r24, 0x0F	; 15
-  32:	80 62       	ori	r24, 0x20	; 32
-  34:	87 b9       	out	0x07, r24	; 7
-	//         ||||ADIE       - разрешение прерывания от компаратора
-	//         |||||ADPS2     - настройка пределителя (влияет на время измерения)
-	//         ||||||ADPS1    -
-	//         |||||||ADPS0   -
-	//         ||||||||
-	ADCSRA = 0b10000111;
-  36:	87 e8       	ldi	r24, 0x87	; 135
-  38:	86 b9       	out	0x06, r24	; 6
-}
-	
-int ReadADC(int number_of_port){
-	SetupADMUX(number_of_port);
-	SetupADCSRA();
+00000044 <__bad_interrupt>:
+  44:	dd cf       	rjmp	.-70     	; 0x0 <__vectors>
+
+00000046 <clear>:
 	ADCSRA |= (1 << ADSC);          // начали измерение
-  3a:	36 9a       	sbi	0x06, 6	; 6
 	while(ADCSRA & (1 << ADSC));    // ждем когда помереет
-  3c:	36 99       	sbic	0x06, 6	; 6
-  3e:	fe cf       	rjmp	.-4      	; 0x3c <ReadADC+0xc>
 	int result = ADCH;              // отбросили шумные незначащие биты
-  40:	85 b1       	in	r24, 0x05	; 5
 	ADCSRA = 0b00000111;            // выключили АЦП
-  42:	97 e0       	ldi	r25, 0x07	; 7
-  44:	96 b9       	out	0x06, r25	; 6
 	return result;
 }
-  46:	90 e0       	ldi	r25, 0x00	; 0
-  48:	08 95       	ret
+  46:	cf 93       	push	r28
+  48:	df 93       	push	r29
+  4a:	c0 e0       	ldi	r28, 0x00	; 0
+  4c:	d0 e0       	ldi	r29, 0x00	; 0
+  4e:	60 e0       	ldi	r22, 0x00	; 0
+  50:	ce 01       	movw	r24, r28
+  52:	40 d0       	rcall	.+128    	; 0xd4 <eeprom_write_byte>
+  54:	21 96       	adiw	r28, 0x01	; 1
+  56:	c1 38       	cpi	r28, 0x81	; 129
+  58:	d1 05       	cpc	r29, r1
+  5a:	c9 f7       	brne	.-14     	; 0x4e <clear+0x8>
+  5c:	df 91       	pop	r29
+  5e:	cf 91       	pop	r28
+  60:	08 95       	ret
 
-0000004a <main>:
-  //         ||||DDB3       - PB3
-  //         |||||DDB2      - PB2
-  //         ||||||DDB1     - PB1
-  //         |||||||DDB0    - PB0
-  //         ||||||||
-	DDRB = 0b00111010;
-  4a:	8a e3       	ldi	r24, 0x3A	; 58
-  4c:	87 bb       	out	0x17, r24	; 23
-	//        ||||WDE         - включение watchdog
-	//        |||||WDP2       - таблица 1
-	//        ||||||WDP1      - таблица 1
-	//        |||||||WDP0     - таблица 1
-	//        ||||||||
-	WDTCR = 0b00001111;
-  4e:	8f e0       	ldi	r24, 0x0F	; 15
-  50:	81 bd       	out	0x21, r24	; 33
-	//        ||||SM0           - таблица 1
-	//        |||||BODSE        - не поддерживается (0 по умолчанию)
-	//        ||||||ISC01       - что-то связанное с прерываниями (к делу не относится)
-	//        |||||||ISC00      - что-то связанное с прерываниями (к делу не относится)
-	//        ||||||||
-	MCUCR = 0b00010000;
-  52:	c0 e1       	ldi	r28, 0x10	; 16
-  54:	c5 bf       	out	0x35, r28	; 53
-int main(void)
-{
-	SetupPins();
-	SetupWatchdog();
-	SetupSleep();
-	ReadADC(1);
-  56:	81 e0       	ldi	r24, 0x01	; 1
-  58:	90 e0       	ldi	r25, 0x00	; 0
-  5a:	ea df       	rcall	.-44     	; 0x30 <ReadADC>
+00000062 <__vector_12>:
+	PORTB = 0b00000000;
+	_delay_ms(ms);
+}
+
+
+ISR(WDT_vect) {
+  62:	1f 92       	push	r1
+  64:	0f 92       	push	r0
+  66:	0f b6       	in	r0, 0x3f	; 63
+  68:	0f 92       	push	r0
+  6a:	11 24       	eor	r1, r1
+  6c:	2f 93       	push	r18
+  6e:	8f 93       	push	r24
+  70:	9f 93       	push	r25
 	//  вся вспомогательная информация в SetupSleep
 	MCUCR |= (1 << SE);
 }
 
-inline void blink(){
+inline void blink(int ms){
 	PORTB = 0b00010000;
-  5c:	c8 bb       	out	0x18, r28	; 24
+  72:	80 e1       	ldi	r24, 0x10	; 16
+  74:	88 bb       	out	0x18, r24	; 24
 	#else
 		//round up by default
 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
 	#endif
 
 	__builtin_avr_delay_cycles(__ticks_dc);
-  5e:	2f e3       	ldi	r18, 0x3F	; 63
-  60:	8d e0       	ldi	r24, 0x0D	; 13
-  62:	93 e0       	ldi	r25, 0x03	; 3
-  64:	21 50       	subi	r18, 0x01	; 1
-  66:	80 40       	sbci	r24, 0x00	; 0
-  68:	90 40       	sbci	r25, 0x00	; 0
-  6a:	e1 f7       	brne	.-8      	; 0x64 <main+0x1a>
-  6c:	00 c0       	rjmp	.+0      	; 0x6e <main+0x24>
-  6e:	00 00       	nop
-	_delay_ms(1000);
+  76:	2f e3       	ldi	r18, 0x3F	; 63
+  78:	8d e0       	ldi	r24, 0x0D	; 13
+  7a:	93 e0       	ldi	r25, 0x03	; 3
+  7c:	21 50       	subi	r18, 0x01	; 1
+  7e:	80 40       	sbci	r24, 0x00	; 0
+  80:	90 40       	sbci	r25, 0x00	; 0
+  82:	e1 f7       	brne	.-8      	; 0x7c <__vector_12+0x1a>
+  84:	00 c0       	rjmp	.+0      	; 0x86 <__vector_12+0x24>
+  86:	00 00       	nop
+	_delay_ms(ms);
 	PORTB = 0b00000000;
-  70:	18 ba       	out	0x18, r1	; 24
-  72:	2f e3       	ldi	r18, 0x3F	; 63
-  74:	8d e0       	ldi	r24, 0x0D	; 13
-  76:	93 e0       	ldi	r25, 0x03	; 3
-  78:	21 50       	subi	r18, 0x01	; 1
-  7a:	80 40       	sbci	r24, 0x00	; 0
-  7c:	90 40       	sbci	r25, 0x00	; 0
-  7e:	e1 f7       	brne	.-8      	; 0x78 <main+0x2e>
-  80:	00 c0       	rjmp	.+0      	; 0x82 <main+0x38>
-  82:	00 00       	nop
-	MCUCR = 0b00010000;
+  88:	18 ba       	out	0x18, r1	; 24
+  8a:	2f e3       	ldi	r18, 0x3F	; 63
+  8c:	8d e0       	ldi	r24, 0x0D	; 13
+  8e:	93 e0       	ldi	r25, 0x03	; 3
+  90:	21 50       	subi	r18, 0x01	; 1
+  92:	80 40       	sbci	r24, 0x00	; 0
+  94:	90 40       	sbci	r25, 0x00	; 0
+  96:	e1 f7       	brne	.-8      	; 0x90 <__vector_12+0x2e>
+  98:	00 c0       	rjmp	.+0      	; 0x9a <__vector_12+0x38>
+  9a:	00 00       	nop
 }
 
-inline void Sleep(){
-	//  вся вспомогательная информация в SetupSleep
-	MCUCR |= (1 << SE);
-  84:	85 b7       	in	r24, 0x35	; 53
-  86:	80 62       	ori	r24, 0x20	; 32
-  88:	85 bf       	out	0x35, r24	; 53
-  8a:	fc cf       	rjmp	.-8      	; 0x84 <main+0x3a>
 
-0000008c <_exit>:
-  8c:	f8 94       	cli
+ISR(WDT_vect) {
+	blink(1000);	
+}
+  9c:	9f 91       	pop	r25
+  9e:	8f 91       	pop	r24
+  a0:	2f 91       	pop	r18
+  a2:	0f 90       	pop	r0
+  a4:	0f be       	out	0x3f, r0	; 63
+  a6:	0f 90       	pop	r0
+  a8:	1f 90       	pop	r1
+  aa:	18 95       	reti
 
-0000008e <__stop_program>:
-  8e:	ff cf       	rjmp	.-2      	; 0x8e <__stop_program>
+000000ac <main>:
+  //         ||||DDB3       - PB3
+  //         |||||DDB2      - PB2
+  //         ||||||DDB1     - PB1
+  //         |||||||DDB0    - PB0
+  //         ||||||||
+	DDRB = 0b00111010;
+  ac:	8a e3       	ldi	r24, 0x3A	; 58
+  ae:	87 bb       	out	0x17, r24	; 23
+
+
+int main(void)
+{
+	SetupPins();
+	sei();
+  b0:	78 94       	sei
+	clear();
+  b2:	c9 df       	rcall	.-110    	; 0x46 <clear>
+	//        ||||WDE         - включение watchdog
+	//        |||||WDP2       - таблица 1
+	//        ||||||WDP1      - таблица 1
+	//        |||||||WDP0     - таблица 1
+	//        ||||||||
+	WDTCR = 0b01111000;
+  b4:	88 e7       	ldi	r24, 0x78	; 120
+  b6:	81 bd       	out	0x21, r24	; 33
+{
+	SetupPins();
+	sei();
+	clear();
+	SetupWatchdog();
+	ADCSRA = 0b00000111;
+  b8:	87 e0       	ldi	r24, 0x07	; 7
+  ba:	86 b9       	out	0x06, r24	; 6
+	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  bc:	85 b7       	in	r24, 0x35	; 53
+  be:	87 7e       	andi	r24, 0xE7	; 231
+  c0:	80 61       	ori	r24, 0x10	; 16
+  c2:	85 bf       	out	0x35, r24	; 53
+	  //}
+	  
+	//counterPlus();
+	
+	while (1) {
+		sleep_mode();
+  c4:	85 b7       	in	r24, 0x35	; 53
+  c6:	80 62       	ori	r24, 0x20	; 32
+  c8:	85 bf       	out	0x35, r24	; 53
+  ca:	88 95       	sleep
+  cc:	85 b7       	in	r24, 0x35	; 53
+  ce:	8f 7d       	andi	r24, 0xDF	; 223
+  d0:	85 bf       	out	0x35, r24	; 53
+  d2:	f8 cf       	rjmp	.-16     	; 0xc4 <main+0x18>
+
+000000d4 <eeprom_write_byte>:
+  d4:	26 2f       	mov	r18, r22
+
+000000d6 <eeprom_write_r18>:
+  d6:	e1 99       	sbic	0x1c, 1	; 28
+  d8:	fe cf       	rjmp	.-4      	; 0xd6 <eeprom_write_r18>
+  da:	1c ba       	out	0x1c, r1	; 28
+  dc:	1f ba       	out	0x1f, r1	; 31
+  de:	8e bb       	out	0x1e, r24	; 30
+  e0:	2d bb       	out	0x1d, r18	; 29
+  e2:	0f b6       	in	r0, 0x3f	; 63
+  e4:	f8 94       	cli
+  e6:	e2 9a       	sbi	0x1c, 2	; 28
+  e8:	e1 9a       	sbi	0x1c, 1	; 28
+  ea:	0f be       	out	0x3f, r0	; 63
+  ec:	01 96       	adiw	r24, 0x01	; 1
+  ee:	08 95       	ret
+
+000000f0 <_exit>:
+  f0:	f8 94       	cli
+
+000000f2 <__stop_program>:
+  f2:	ff cf       	rjmp	.-2      	; 0xf2 <__stop_program>

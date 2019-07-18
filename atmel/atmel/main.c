@@ -1,8 +1,13 @@
-# define F_CPU 1000000UL
+//# define F_CPU 1000000UL
+
+
 
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/eeprom.h>
+#include <avr/wdt.h>
+#include <avr/interrupt.h>
+#include <avr/sleep.h>
 
 const int n = 128;
 //PB0 - сигнал с датчика влажности
@@ -12,58 +17,60 @@ const int n = 128;
 //PB4 - сигнал на пищалку
 //PB5 - ресет пин
 
-class eeprom{
-	public:
-	int Eread(int i){
-		return eeprom_read_byte((uint8_t*)i);
-	}
-	void Ewrite(int addr,  int inf){
-		eeprom_write_byte((uint8_t*) addr, (uint8_t*) inf) ;
-	}
-	void clear(){
-		for (int i =0; i <= n; i++){
-			Ewrite(i, 0);
-		}
-	}
-	int searchZero(){
-		int inf = 0;
-		for(int i = 0; i <= n; i++){
-			if (Eread(i) == 0){
-				return i;
-			}
-		}
-		return 0;
-	}
-	int returnCounter(){
-		int zero = searchZero();
-		if (zero == 0){
-			return Eread(n);
-		}
-		return Eread(zero - 1);
-	}
-	bool checkCounter(int maxi = 10){
-		if (returnCounter() == maxi){
-			if (searchZero() == n){
-				int zero = searchZero();
-				Ewrite(0, 0);
-				Ewrite(zero, 1);
-				} else {
-				int zero = searchZero();
-				Ewrite(zero + 1, 0);
-				Ewrite(zero, 1);
-			}
-		}
-	}
-	void counterPlus(){
-		int zero = searchZero();
-		if (zero == 0){
-			Ewrite(n, Eread(n) + 1);
-			} else{
-			Ewrite(zero - 1, Eread(zero - 1) + 1);
-		}
-	}
-};
+int Eread(int i){
+	return eeprom_read_byte((uint8_t*)i);
+}
 
+void Ewrite(int addr,  int inf){
+	eeprom_write_byte((uint8_t*) addr, (uint8_t*) inf) ;
+}
+
+void clear(){
+	for (int i =0; i <= n; i++){
+		Ewrite(i, 0);
+	}
+}
+
+int searchZero(){
+	int inf = 0;
+	for(int i = 0; i <= n; i++){
+		if (Eread(i) == 0){
+			return i;
+		}
+	}
+	return 0;
+}
+
+int returnCounter(){
+	int zero = searchZero();
+	if (zero == 0){
+		return Eread(n);
+	}
+	return Eread(zero - 1);
+}
+
+void checkCounter(int maxi){
+	if (returnCounter() == maxi){
+		if (searchZero() == n){
+			int zero = searchZero();
+			Ewrite(0, 0);
+			Ewrite(zero, 1);
+			} else {
+			int zero = searchZero();
+			Ewrite(zero + 1, 0);
+			Ewrite(zero, 1);
+		}
+	}
+}
+
+void counterPlus(){
+	int zero = searchZero();
+	if (zero == 0){
+		Ewrite(n, Eread(n) + 1);
+		} else{
+		Ewrite(zero - 1, Eread(zero - 1) + 1);
+	}
+}
 
 inline void SetupADCSRA(){
 	//         ADEN           - Подать питание на АЦП
@@ -169,57 +176,36 @@ inline void SetupWatchdog(){
 	//        ||||||WDP1      - таблица 1
 	//        |||||||WDP0     - таблица 1
 	//        ||||||||
-	WDTCR = 0b00001111;
-}
-
-inline void SetupSleep(){
-	// таблица 1 
-	// SM1   SM0
-	//  0     0    - idle (работает все кроме ЦП)
-	//  0     1    - ADC Noise Reduction (нужно чтоб помочь АЦП измерять точнее. отключает что-то что мешает АЦП)
-	//  1     0    - Power-down (отключает все, кроме watchdog и обработчика прерываний. самый крутой режим)
-	//  1     1    - reserved  (не лезь)
+	WDTCR = 0b01111000;
 	
-	
-	//        BODS              - не поддерживается (0 по умолчанию)
-	//        |PUD              - хз что, нет в даташите
-	//        ||SE              - выключатель режима сна (установи 1 чтоб заснуть)
-	//        |||SM1            - таблица 1
-	//        ||||SM0           - таблица 1
-	//        |||||BODSE        - не поддерживается (0 по умолчанию)
-	//        ||||||ISC01       - что-то связанное с прерываниями (к делу не относится)
-	//        |||||||ISC00      - что-то связанное с прерываниями (к делу не относится)
-	//        ||||||||
-	MCUCR = 0b00010000;
 }
 
-inline void Sleep(){
-	//  вся вспомогательная информация в SetupSleep
-	MCUCR |= (1 << SE);
-}
-
-inline void blink(){
+inline void blink(int ms){
 	PORTB = 0b00010000;
-	_delay_ms(1000);
+	_delay_ms(ms);
 	PORTB = 0b00000000;
-	_delay_ms(1000);
+	_delay_ms(ms);
 }
-
-
-eeprom a;
 
 int main(void)
 {
 	SetupPins();
+	sei();
+	clear();
 	SetupWatchdog();
-	SetupSleep();
-	a.checkCounter(4);    //сбрасываем таймер при переполнении 
-  	if (a.returnCounter() == 4){
-		blink();
-	  }
-	a.counterPlus();
+	ADCSRA = 0b00000111;
+	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+	//blink(1000);
+	//checkCounter(3);    //сбрасываем таймер при переполнении 
+
+	 // if (returnCounter() == 3){
+		//blink(1000);
+	  //}
+	  
+	//counterPlus();
+	
 	while (1) {
-		Sleep();
+		sleep_mode();
     }
 }
 
