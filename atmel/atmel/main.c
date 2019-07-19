@@ -1,6 +1,4 @@
-//# define F_CPU 1000000UL
-
-
+# define F_CPU 1000000UL
 
 #include <avr/io.h>
 #include <util/delay.h>
@@ -10,6 +8,7 @@
 #include <avr/sleep.h>
 
 const int n = 128;
+
 //PB0 - сигнал с датчика влажности
 //PB1 - питание датчика воды
 //PB2 - сигнал с датчика света
@@ -18,11 +17,11 @@ const int n = 128;
 //PB5 - ресет пин
 
 int Eread(int i){
-	return eeprom_read_byte((uint8_t*)i);
+	return eeprom_read_byte(i);
 }
 
 void Ewrite(int addr,  int inf){
-	eeprom_write_byte((uint8_t*) addr, (uint8_t*) inf) ;
+	eeprom_write_byte( addr,  inf) ;
 }
 
 void clear(){
@@ -191,18 +190,18 @@ int main(void)
 {
 	SetupPins();
 	sei();
-	clear();
+	
 	SetupWatchdog();
 	ADCSRA = 0b00000111;
 	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-	//blink(1000);
-	//checkCounter(3);    //сбрасываем таймер при переполнении 
+	
+	checkCounter(3);    //сбрасываем таймер при переполнении 
 
-	 // if (returnCounter() == 3){
-		//blink(1000);
-	  //}
+	  if (returnCounter() == 3){
+		blink(100000);
+	  }
 	  
-	//counterPlus();
+	counterPlus();
 	
 	while (1) {
 		sleep_mode();
