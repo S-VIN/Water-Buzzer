@@ -2,73 +2,32 @@
 
 #include <avr/io.h>
 #include <util/delay.h>
-#include <avr/eeprom.h>
 #include <avr/wdt.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 
-const int n = 128;
+const int sensorSurvey = 10; //в секундах 
+int interruptFlug = 0;
 
-//PB0 - сигнал с датчика влажности
-//PB1 - питание датчика воды
-//PB2 - сигнал с датчика света
-//PB3 - питание датчика света
-//PB4 - сигнал на пищалку
+//PB0 - питание фоторезистора
+//PB1 - питание пищалки
+//PB2 - питание водного датчика
+//PB3 - данные с фоторезистора
+//PB4 - данные водного датчика
 //PB5 - ресет пин
 
-int Eread(int i){
-	return eeprom_read_byte(i);
-}
-
-void Ewrite(int addr,  int inf){
-	eeprom_write_byte( addr,  inf) ;
-}
-
-void clear(){
-	for (int i =0; i <= n; i++){
-		Ewrite(i, 0);
-	}
-}
-
-int searchZero(){
-	int inf = 0;
-	for(int i = 0; i <= n; i++){
-		if (Eread(i) == 0){
-			return i;
-		}
-	}
-	return 0;
-}
-
-int returnCounter(){
-	int zero = searchZero();
-	if (zero == 0){
-		return Eread(n);
-	}
-	return Eread(zero - 1);
-}
-
-void checkCounter(int maxi){
-	if (returnCounter() == maxi){
-		if (searchZero() == n){
-			int zero = searchZero();
-			Ewrite(0, 0);
-			Ewrite(zero, 1);
-			} else {
-			int zero = searchZero();
-			Ewrite(zero + 1, 0);
-			Ewrite(zero, 1);
-		}
-	}
-}
-
-void counterPlus(){
-	int zero = searchZero();
-	if (zero == 0){
-		Ewrite(n, Eread(n) + 1);
-		} else{
-		Ewrite(zero - 1, Eread(zero - 1) + 1);
-	}
+inline void SetupPins(){
+	//       x              - Биты отвечают за назначение пинов
+	//       |x             - 1 - OUTPUT; 0 - INPUT
+	//       ||DDB5         - PB5
+	//       |||DDB4        - PB4
+	//       ||||DDB3       - PB3
+	//       |||||DDB2      - PB2
+	//       ||||||DDB1     - PB1
+	//       |||||||DDB0    - PB0
+	//       ||||||||
+	DDRB = 0b00100111;
+	
 }
 
 inline void SetupADCSRA(){
@@ -125,7 +84,7 @@ inline void SetupADMUX(int src){
 	//        ||||||||
 	ADMUX = 0b00100000 | (src & 0b00001111);
 }
-	
+
 int ReadADC(int number_of_port){
 	SetupADMUX(number_of_port);
 	SetupADCSRA();
@@ -136,21 +95,8 @@ int ReadADC(int number_of_port){
 	return result;
 }
 
-inline void SetupPins(){
-  //         x              - Биты отвечают за назначение пинов
-  //         |x             - 1 - OUTPUT; 0 - INPUT
-  //         ||DDB5         - PB5
-  //         |||DDB4        - PB4
-  //         ||||DDB3       - PB3
-  //         |||||DDB2      - PB2
-  //         ||||||DDB1     - PB1
-  //         |||||||DDB0    - PB0
-  //         ||||||||
-	DDRB = 0b00111010;
-}
-
 inline void SetupWatchdog(){
-    // таблица 1 
+	// таблица 1
 	// WDP3  WDP2  WDP1  WDP0 - отвечают за время срабатывания watchdog
 	//  0      0     0     0  - 16ms
 	//  0      1     0     0  - 25ms
@@ -159,7 +105,7 @@ inline void SetupWatchdog(){
 	//  1      0     0     0  - 4s
 	//  1      0     0     1  - 8s - maximum
 	
-	// таблица 2 
+	// таблица 2
 	// WDE  WDIE  - отвечают за режимы watchdog
 	//  0    0    - none
 	//  0    1    - interrupt mode
@@ -175,36 +121,43 @@ inline void SetupWatchdog(){
 	//        ||||||WDP1      - таблица 1
 	//        |||||||WDP0     - таблица 1
 	//        ||||||||
-	WDTCR = 0b01111000;
-	
+	WDTCR = 0b01110001;
+	sei();
 }
 
-inline void blink(int ms){
-	PORTB = 0b00010000;
+inline void Buzz(int ms){
+	PORTB = 0b00000010;
 	_delay_ms(ms);
 	PORTB = 0b00000000;
 	_delay_ms(ms);
 }
 
-int main(void)
-{
-	SetupPins();
-	sei();
-	
-	SetupWatchdog();
-	ADCSRA = 0b00000111;
-	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-	
-	checkCounter(3);    //сбрасываем таймер при переполнении 
 
-	  if (returnCounter() == 3){
-		blink(100000);
-	  }
-	  
-	counterPlus();
-	
-	while (1) {
-		sleep_mode();
-    }
+ISR (WDT_vect) {
+	interruptFlug++;
 }
 
+
+inline void DoCode(){
+	PORTB = 0b00000101;
+	//if((ReadADC(3) > 500) && (ReadADC(2) > 400)){
+		Buzz(1000);
+	//}
+	//PORTB = 0b00000000;
+}
+
+int main(void)
+{
+	int realSurvey = sensorSurvey / 8;
+	SetupPins();
+	SetupWatchdog();
+	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+	
+	while (1) {
+		if (interruptFlug >= realSurvey){
+			
+			interruptFlug = 0;
+		}
+		sleep_mode();
+	}
+}
