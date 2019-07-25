@@ -3,13 +3,13 @@ atmel.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .text         000000c0  00000000  00000000  00000074  2**1
+  0 .text         000000be  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .data         00000000  00800060  00800060  00000134  2**0
+  1 .data         00000000  00800060  00800060  00000132  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  2 .bss          00000002  00800060  00800060  00000134  2**0
+  2 .bss          00000002  00800060  00800060  00000132  2**0
                   ALLOC
-  3 .comment      00000030  00000000  00000000  00000134  2**0
+  3 .comment      00000030  00000000  00000000  00000132  2**0
                   CONTENTS, READONLY
   4 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000164  2**2
                   CONTENTS, READONLY
@@ -61,7 +61,7 @@ Disassembly of section .text:
   2a:	10 e0       	ldi	r17, 0x00	; 0
   2c:	a0 e6       	ldi	r26, 0x60	; 96
   2e:	b0 e0       	ldi	r27, 0x00	; 0
-  30:	e0 ec       	ldi	r30, 0xC0	; 192
+  30:	ee eb       	ldi	r30, 0xBE	; 190
   32:	f0 e0       	ldi	r31, 0x00	; 0
   34:	02 c0       	rjmp	.+4      	; 0x3a <__do_copy_data+0x10>
   36:	05 90       	lpm	r0, Z+
@@ -84,7 +84,7 @@ Disassembly of section .text:
   4c:	b2 07       	cpc	r27, r18
   4e:	e1 f7       	brne	.-8      	; 0x48 <.do_clear_bss_loop>
   50:	19 d0       	rcall	.+50     	; 0x84 <main>
-  52:	34 c0       	rjmp	.+104    	; 0xbc <_exit>
+  52:	33 c0       	rjmp	.+102    	; 0xba <_exit>
 
 00000054 <__bad_interrupt>:
   54:	d5 cf       	rjmp	.-86     	; 0x0 <__vectors>
@@ -132,14 +132,14 @@ ISR (WDT_vect) {
 	//        ||||||WDP1      - таблица 1
 	//        |||||||WDP0     - таблица 1
 	//        ||||||||
-	WDTCR = 0b01110001;
-  88:	81 e7       	ldi	r24, 0x71	; 113
+	WDTCR = 0b01010110;
+  88:	86 e5       	ldi	r24, 0x56	; 86
   8a:	81 bd       	out	0x21, r24	; 33
 	sei();
   8c:	78 94       	sei
 int main(void)
 {
-	int realSurvey = sensorSurvey / 8;
+	int realSurvey = sensorSurvey / 1;
 	SetupPins();
 	SetupWatchdog();
 	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
@@ -152,27 +152,26 @@ int main(void)
 		if (interruptFlug >= realSurvey){
   96:	80 91 60 00 	lds	r24, 0x0060	; 0x800060 <__data_end>
   9a:	90 91 61 00 	lds	r25, 0x0061	; 0x800061 <__data_end+0x1>
-  9e:	18 16       	cp	r1, r24
-  a0:	19 06       	cpc	r1, r25
-  a2:	24 f4       	brge	.+8      	; 0xac <main+0x28>
+  9e:	0a 97       	sbiw	r24, 0x0a	; 10
+  a0:	24 f0       	brlt	.+8      	; 0xaa <main+0x26>
 			
 			interruptFlug = 0;
-  a4:	10 92 61 00 	sts	0x0061, r1	; 0x800061 <__data_end+0x1>
-  a8:	10 92 60 00 	sts	0x0060, r1	; 0x800060 <__data_end>
+  a2:	10 92 61 00 	sts	0x0061, r1	; 0x800061 <__data_end+0x1>
+  a6:	10 92 60 00 	sts	0x0060, r1	; 0x800060 <__data_end>
 		}
 		sleep_mode();
-  ac:	85 b7       	in	r24, 0x35	; 53
-  ae:	80 62       	ori	r24, 0x20	; 32
-  b0:	85 bf       	out	0x35, r24	; 53
-  b2:	88 95       	sleep
-  b4:	85 b7       	in	r24, 0x35	; 53
-  b6:	8f 7d       	andi	r24, 0xDF	; 223
-  b8:	85 bf       	out	0x35, r24	; 53
+  aa:	85 b7       	in	r24, 0x35	; 53
+  ac:	80 62       	ori	r24, 0x20	; 32
+  ae:	85 bf       	out	0x35, r24	; 53
+  b0:	88 95       	sleep
+  b2:	85 b7       	in	r24, 0x35	; 53
+  b4:	8f 7d       	andi	r24, 0xDF	; 223
+  b6:	85 bf       	out	0x35, r24	; 53
 	}
-  ba:	ed cf       	rjmp	.-38     	; 0x96 <main+0x12>
+  b8:	ee cf       	rjmp	.-36     	; 0x96 <main+0x12>
 
-000000bc <_exit>:
-  bc:	f8 94       	cli
+000000ba <_exit>:
+  ba:	f8 94       	cli
 
-000000be <__stop_program>:
-  be:	ff cf       	rjmp	.-2      	; 0xbe <__stop_program>
+000000bc <__stop_program>:
+  bc:	ff cf       	rjmp	.-2      	; 0xbc <__stop_program>

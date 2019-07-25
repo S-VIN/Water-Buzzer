@@ -121,7 +121,7 @@ inline void SetupWatchdog(){
 	//        ||||||WDP1      - таблица 1
 	//        |||||||WDP0     - таблица 1
 	//        ||||||||
-	WDTCR = 0b01110001;
+	WDTCR = 0b01010110;
 	sei();
 }
 
@@ -141,14 +141,14 @@ ISR (WDT_vect) {
 inline void DoCode(){
 	PORTB = 0b00000101;
 	//if((ReadADC(3) > 500) && (ReadADC(2) > 400)){
-		Buzz(1000);
+		Buzz(100);
 	//}
 	//PORTB = 0b00000000;
 }
 
 int main(void)
 {
-	int realSurvey = sensorSurvey / 8;
+	int realSurvey = sensorSurvey / 1;
 	SetupPins();
 	SetupWatchdog();
 	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
