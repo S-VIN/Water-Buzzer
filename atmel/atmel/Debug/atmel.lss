@@ -3,31 +3,31 @@ atmel.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .text         000000be  00000000  00000000  00000074  2**1
+  0 .text         00000290  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .data         00000000  00800060  00800060  00000132  2**0
+  1 .data         00000000  00800060  00800060  00000304  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  2 .bss          00000002  00800060  00800060  00000132  2**0
+  2 .bss          00000002  00800060  00800060  00000304  2**0
                   ALLOC
-  3 .comment      00000030  00000000  00000000  00000132  2**0
+  3 .comment      00000030  00000000  00000000  00000304  2**0
                   CONTENTS, READONLY
-  4 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000164  2**2
+  4 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000334  2**2
                   CONTENTS, READONLY
-  5 .debug_aranges 00000030  00000000  00000000  000001a0  2**0
+  5 .debug_aranges 00000038  00000000  00000000  00000370  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   000005b3  00000000  00000000  000001d0  2**0
+  6 .debug_info   00000d3f  00000000  00000000  000003a8  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 0000050f  00000000  00000000  00000783  2**0
+  7 .debug_abbrev 00000624  00000000  00000000  000010e7  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   0000021b  00000000  00000000  00000c92  2**0
+  8 .debug_line   00000526  00000000  00000000  0000170b  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  00000058  00000000  00000000  00000eb0  2**2
+  9 .debug_frame  00000068  00000000  00000000  00001c34  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    00000351  00000000  00000000  00000f08  2**0
+ 10 .debug_str    000003eb  00000000  00000000  00001c9c  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    0000006f  00000000  00000000  00001259  2**0
+ 11 .debug_loc    00000557  00000000  00000000  00002087  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000020  00000000  00000000  000012c8  2**0
+ 12 .debug_ranges 00000270  00000000  00000000  000025de  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -45,7 +45,7 @@ Disassembly of section .text:
   12:	20 c0       	rjmp	.+64     	; 0x54 <__bad_interrupt>
   14:	1f c0       	rjmp	.+62     	; 0x54 <__bad_interrupt>
   16:	1e c0       	rjmp	.+60     	; 0x54 <__bad_interrupt>
-  18:	1e c0       	rjmp	.+60     	; 0x56 <__vector_12>
+  18:	2f c0       	rjmp	.+94     	; 0x78 <__vector_12>
   1a:	1c c0       	rjmp	.+56     	; 0x54 <__bad_interrupt>
   1c:	1b c0       	rjmp	.+54     	; 0x54 <__bad_interrupt>
 
@@ -61,8 +61,8 @@ Disassembly of section .text:
   2a:	10 e0       	ldi	r17, 0x00	; 0
   2c:	a0 e6       	ldi	r26, 0x60	; 96
   2e:	b0 e0       	ldi	r27, 0x00	; 0
-  30:	ee eb       	ldi	r30, 0xBE	; 190
-  32:	f0 e0       	ldi	r31, 0x00	; 0
+  30:	e0 e9       	ldi	r30, 0x90	; 144
+  32:	f2 e0       	ldi	r31, 0x02	; 2
   34:	02 c0       	rjmp	.+4      	; 0x3a <__do_copy_data+0x10>
   36:	05 90       	lpm	r0, Z+
   38:	0d 92       	st	X+, r0
@@ -83,95 +83,689 @@ Disassembly of section .text:
   4a:	a2 36       	cpi	r26, 0x62	; 98
   4c:	b2 07       	cpc	r27, r18
   4e:	e1 f7       	brne	.-8      	; 0x48 <.do_clear_bss_loop>
-  50:	19 d0       	rcall	.+50     	; 0x84 <main>
-  52:	33 c0       	rjmp	.+102    	; 0xba <_exit>
+  50:	2a d0       	rcall	.+84     	; 0xa6 <main>
+  52:	1c c1       	rjmp	.+568    	; 0x28c <_exit>
 
 00000054 <__bad_interrupt>:
   54:	d5 cf       	rjmp	.-86     	; 0x0 <__vectors>
 
-00000056 <__vector_12>:
-	PORTB = 0b00000000;
-	_delay_ms(ms);
+00000056 <delay_ms>:
+inline uint16_t myRandom(uint16_t min, uint16_t max) {
+    return (rand() % (max - min) + min);
 }
 
+void delay_ms (uint16_t count) {
+    while (count--) {
+  56:	00 97       	sbiw	r24, 0x00	; 0
+  58:	41 f0       	breq	.+16     	; 0x6a <delay_ms+0x14>
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+  5a:	e9 ef       	ldi	r30, 0xF9	; 249
+  5c:	f0 e0       	ldi	r31, 0x00	; 0
+  5e:	31 97       	sbiw	r30, 0x01	; 1
+  60:	f1 f7       	brne	.-4      	; 0x5e <delay_ms+0x8>
+  62:	00 c0       	rjmp	.+0      	; 0x64 <delay_ms+0xe>
+  64:	00 00       	nop
+  66:	01 97       	sbiw	r24, 0x01	; 1
+  68:	c1 f7       	brne	.-16     	; 0x5a <delay_ms+0x4>
+  6a:	08 95       	ret
+
+0000006c <delay_us>:
+
+    }
+}
+
+void delay_us (uint16_t count) {
+    while (count--) {
+  6c:	00 97       	sbiw	r24, 0x00	; 0
+  6e:	19 f0       	breq	.+6      	; 0x76 <delay_us+0xa>
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+  70:	00 00       	nop
+  72:	01 97       	sbiw	r24, 0x01	; 1
+  74:	e9 f7       	brne	.-6      	; 0x70 <delay_us+0x4>
+  76:	08 95       	ret
+
+00000078 <__vector_12>:
+
+const uint32_t sensorSurvey = 1200; //� �������� 
+
+int interruptFlug = 0;
 
 ISR (WDT_vect) {
-  56:	1f 92       	push	r1
-  58:	0f 92       	push	r0
-  5a:	0f b6       	in	r0, 0x3f	; 63
-  5c:	0f 92       	push	r0
-  5e:	11 24       	eor	r1, r1
-  60:	8f 93       	push	r24
-  62:	9f 93       	push	r25
+  78:	1f 92       	push	r1
+  7a:	0f 92       	push	r0
+  7c:	0f b6       	in	r0, 0x3f	; 63
+  7e:	0f 92       	push	r0
+  80:	11 24       	eor	r1, r1
+  82:	8f 93       	push	r24
+  84:	9f 93       	push	r25
 	interruptFlug++;
-  64:	80 91 60 00 	lds	r24, 0x0060	; 0x800060 <__data_end>
-  68:	90 91 61 00 	lds	r25, 0x0061	; 0x800061 <__data_end+0x1>
-  6c:	01 96       	adiw	r24, 0x01	; 1
-  6e:	90 93 61 00 	sts	0x0061, r25	; 0x800061 <__data_end+0x1>
-  72:	80 93 60 00 	sts	0x0060, r24	; 0x800060 <__data_end>
+  86:	80 91 60 00 	lds	r24, 0x0060	; 0x800060 <__DATA_REGION_ORIGIN__>
+  8a:	90 91 61 00 	lds	r25, 0x0061	; 0x800061 <__DATA_REGION_ORIGIN__+0x1>
+  8e:	01 96       	adiw	r24, 0x01	; 1
+  90:	90 93 61 00 	sts	0x0061, r25	; 0x800061 <__DATA_REGION_ORIGIN__+0x1>
+  94:	80 93 60 00 	sts	0x0060, r24	; 0x800060 <__DATA_REGION_ORIGIN__>
 }
-  76:	9f 91       	pop	r25
-  78:	8f 91       	pop	r24
-  7a:	0f 90       	pop	r0
-  7c:	0f be       	out	0x3f, r0	; 63
-  7e:	0f 90       	pop	r0
-  80:	1f 90       	pop	r1
-  82:	18 95       	reti
+  98:	9f 91       	pop	r25
+  9a:	8f 91       	pop	r24
+  9c:	0f 90       	pop	r0
+  9e:	0f be       	out	0x3f, r0	; 63
+  a0:	0f 90       	pop	r0
+  a2:	1f 90       	pop	r1
+  a4:	18 95       	reti
 
-00000084 <main>:
-	//       ||||DDB3       - PB3
-	//       |||||DDB2      - PB2
-	//       ||||||DDB1     - PB1
-	//       |||||||DDB0    - PB0
-	//       ||||||||
-	DDRB = 0b00100111;
-  84:	87 e2       	ldi	r24, 0x27	; 39
-  86:	87 bb       	out	0x17, r24	; 23
+000000a6 <main>:
+    //       ||||DDB3       - PB3
+    //       |||||DDB2      - PB2
+    //       ||||||DDB1     - PB1
+    //       |||||||DDB0    - PB0
+    //       ||||||||
+    DDRB = 0b00100111;
+  a6:	87 e2       	ldi	r24, 0x27	; 39
+  a8:	87 bb       	out	0x17, r24	; 23
 	//        ||||WDE         - ��������� watchdog
 	//        |||||WDP2       - ������� 1
 	//        ||||||WDP1      - ������� 1
 	//        |||||||WDP0     - ������� 1
 	//        ||||||||
-	WDTCR = 0b01010110;
-  88:	86 e5       	ldi	r24, 0x56	; 86
-  8a:	81 bd       	out	0x21, r24	; 33
+	WDTCR = 0b01110001;
+  aa:	81 e7       	ldi	r24, 0x71	; 113
+  ac:	81 bd       	out	0x21, r24	; 33
 	sei();
-  8c:	78 94       	sei
+  ae:	78 94       	sei
+  b0:	68 94       	set
+  b2:	ee 24       	eor	r14, r14
+  b4:	e2 f8       	bld	r14, 2
+  b6:	f1 2c       	mov	r15, r1
+  b8:	1c c0       	rjmp	.+56     	; 0xf2 <main+0x4c>
+    //normal chirpsNumber 3, normal intensity 5
+    for(int veces = 0; veces < chirpsNumber; veces++) {
+
+        for (int i = 80; i > 0; i--) {
+            for  (int x = 0; x < intensity;  x++) {
+                PB1_HIGH;
+  ba:	c1 9a       	sbi	0x18, 1	; 24
+                delay_us(i);
+  bc:	c8 01       	movw	r24, r16
+  be:	d6 df       	rcall	.-84     	; 0x6c <delay_us>
+                PB1_LOW;
+  c0:	c1 98       	cbi	0x18, 1	; 24
+                delay_us(i);
+  c2:	c8 01       	movw	r24, r16
+  c4:	d3 df       	rcall	.-90     	; 0x6c <delay_us>
+  c6:	21 97       	sbiw	r28, 0x01	; 1
+inline void tweet(int intensity, int chirpsNumber) {
+    //normal chirpsNumber 3, normal intensity 5
+    for(int veces = 0; veces < chirpsNumber; veces++) {
+
+        for (int i = 80; i > 0; i--) {
+            for  (int x = 0; x < intensity;  x++) {
+  c8:	c1 f7       	brne	.-16     	; 0xba <main+0x14>
+  ca:	01 50       	subi	r16, 0x01	; 1
+  cc:	11 09       	sbc	r17, r1
+
+inline void tweet(int intensity, int chirpsNumber) {
+    //normal chirpsNumber 3, normal intensity 5
+    for(int veces = 0; veces < chirpsNumber; veces++) {
+
+        for (int i = 80; i > 0; i--) {
+  ce:	19 f0       	breq	.+6      	; 0xd6 <main+0x30>
+		alarmSound();
+	}
+}
+
 int main(void)
 {
-	int realSurvey = sensorSurvey / 1;
+  d0:	c5 e0       	ldi	r28, 0x05	; 5
+  d2:	d0 e0       	ldi	r29, 0x00	; 0
+  d4:	f2 cf       	rjmp	.-28     	; 0xba <main+0x14>
+  d6:	81 e0       	ldi	r24, 0x01	; 1
+  d8:	c8 1a       	sub	r12, r24
+  da:	d1 08       	sbc	r13, r1
+    }
+}
+
+inline void tweet(int intensity, int chirpsNumber) {
+    //normal chirpsNumber 3, normal intensity 5
+    for(int veces = 0; veces < chirpsNumber; veces++) {
+  dc:	19 f0       	breq	.+6      	; 0xe4 <main+0x3e>
+  de:	00 e5       	ldi	r16, 0x50	; 80
+  e0:	10 e0       	ldi	r17, 0x00	; 0
+  e2:	f6 cf       	rjmp	.-20     	; 0xd0 <main+0x2a>
 	SetupPins();
 	SetupWatchdog();
+	
+	for(int i = 0; i <= 3; i++){
+		tweet(5, 3);
+		delay_ms(500);
+  e4:	84 ef       	ldi	r24, 0xF4	; 244
+  e6:	91 e0       	ldi	r25, 0x01	; 1
+  e8:	b6 df       	rcall	.-148    	; 0x56 <delay_ms>
+  ea:	81 e0       	ldi	r24, 0x01	; 1
+  ec:	e8 1a       	sub	r14, r24
+  ee:	f1 08       	sbc	r15, r1
+{
+	int realSurvey = sensorSurvey / 8;
+	SetupPins();
+	SetupWatchdog();
+	
+	for(int i = 0; i <= 3; i++){
+  f0:	31 f0       	breq	.+12     	; 0xfe <main+0x58>
+		alarmSound();
+	}
+}
+
+int main(void)
+{
+  f2:	0f 2e       	mov	r0, r31
+  f4:	f3 e0       	ldi	r31, 0x03	; 3
+  f6:	cf 2e       	mov	r12, r31
+  f8:	d1 2c       	mov	r13, r1
+  fa:	f0 2d       	mov	r31, r0
+  fc:	f0 cf       	rjmp	.-32     	; 0xde <main+0x38>
+  fe:	0d e3       	ldi	r16, 0x3D	; 61
+ 100:	10 e0       	ldi	r17, 0x00	; 0
+    //        ||||MUX3        - таблица 2
+    //        |||||MUX2       - таблица 2
+    //        ||||||MUX1      - таблица 2
+    //        |||||||MUX0     - таблица 2
+    //        ||||||||
+    ADMUX = 0b00100000 | (src & 0b00001111);
+ 102:	0f 2e       	mov	r0, r31
+ 104:	f3 e2       	ldi	r31, 0x23	; 35
+ 106:	af 2e       	mov	r10, r31
+ 108:	f0 2d       	mov	r31, r0
+    //         ||||ADIE       - разрешение прерывания от компаратора
+    //         |||||ADPS2     - настройка пределителя (влияет на время измерения)
+    //         ||||||ADPS1    -
+    //         |||||||ADPS0   -
+    //         ||||||||
+    ADCSRA = 0b10000111;
+ 10a:	0f 2e       	mov	r0, r31
+ 10c:	f7 e8       	ldi	r31, 0x87	; 135
+ 10e:	cf 2e       	mov	r12, r31
+ 110:	f0 2d       	mov	r31, r0
+    SetupADMUX(number_of_port);
+    SetupADCSRA();
+    ADCSRA |= (1 << ADSC);          // начали измерение
+    while(ADCSRA & (1 << ADSC));    // ждем когда помереет
+    int result = ADCH;              // отбросили шумные незначащие биты
+    ADCSRA = 0b00000111;            // выключили АЦП
+ 112:	0f 2e       	mov	r0, r31
+ 114:	f7 e0       	ldi	r31, 0x07	; 7
+ 116:	df 2e       	mov	r13, r31
+ 118:	f0 2d       	mov	r31, r0
+    //        ||||MUX3        - таблица 2
+    //        |||||MUX2       - таблица 2
+    //        ||||||MUX1      - таблица 2
+    //        |||||||MUX0     - таблица 2
+    //        ||||||||
+    ADMUX = 0b00100000 | (src & 0b00001111);
+ 11a:	0f 2e       	mov	r0, r31
+ 11c:	f2 e2       	ldi	r31, 0x22	; 34
+ 11e:	bf 2e       	mov	r11, r31
+ 120:	f0 2d       	mov	r31, r0
+    PB2_LOW;
+    return result;
+}
+
+inline int ReadLight() {
+    PB0_HIGH;
+ 122:	c0 9a       	sbi	0x18, 0	; 24
+    delay_ms(MEASUREMENT_TIME);
+ 124:	84 e6       	ldi	r24, 0x64	; 100
+ 126:	90 e0       	ldi	r25, 0x00	; 0
+ 128:	96 df       	rcall	.-212    	; 0x56 <delay_ms>
+    //        ||||MUX3        - таблица 2
+    //        |||||MUX2       - таблица 2
+    //        ||||||MUX1      - таблица 2
+    //        |||||||MUX0     - таблица 2
+    //        ||||||||
+    ADMUX = 0b00100000 | (src & 0b00001111);
+ 12a:	a7 b8       	out	0x07, r10	; 7
+    //         ||||ADIE       - разрешение прерывания от компаратора
+    //         |||||ADPS2     - настройка пределителя (влияет на время измерения)
+    //         ||||||ADPS1    -
+    //         |||||||ADPS0   -
+    //         ||||||||
+    ADCSRA = 0b10000111;
+ 12c:	c6 b8       	out	0x06, r12	; 6
+}
+
+inline int ReadADC(int number_of_port) {
+    SetupADMUX(number_of_port);
+    SetupADCSRA();
+    ADCSRA |= (1 << ADSC);          // начали измерение
+ 12e:	36 9a       	sbi	0x06, 6	; 6
+    while(ADCSRA & (1 << ADSC));    // ждем когда помереет
+ 130:	36 99       	sbic	0x06, 6	; 6
+ 132:	fe cf       	rjmp	.-4      	; 0x130 <__DATA_REGION_LENGTH__+0x30>
+    int result = ADCH;              // отбросили шумные незначащие биты
+ 134:	85 b1       	in	r24, 0x05	; 5
+    ADCSRA = 0b00000111;            // выключили АЦП
+ 136:	d6 b8       	out	0x06, r13	; 6
+
+inline int ReadLight() {
+    PB0_HIGH;
+    delay_ms(MEASUREMENT_TIME);
+    int result = ReadADC(3);
+    PB0_LOW;
+ 138:	c0 98       	cbi	0x18, 0	; 24
+	
+	for(int i = 0; i <= 60; i++){
+		//uart_tx_init();
+		//num_to_str(ReadWater(), 4);
+		//uart_print("\r\n");
+		if ((ReadLight() > 100) && (ReadWater() < 100)){
+ 13a:	90 e0       	ldi	r25, 0x00	; 0
+ 13c:	85 36       	cpi	r24, 0x65	; 101
+ 13e:	91 05       	cpc	r25, r1
+ 140:	b4 f1       	brlt	.+108    	; 0x1ae <__stack+0x4f>
+    ADCSRA = 0b00000111;            // выключили АЦП
+    return result;
+}
+
+inline int ReadWater() {
+    PB2_HIGH;
+ 142:	c2 9a       	sbi	0x18, 2	; 24
+    delay_ms(MEASUREMENT_TIME);
+ 144:	84 e6       	ldi	r24, 0x64	; 100
+ 146:	90 e0       	ldi	r25, 0x00	; 0
+ 148:	86 df       	rcall	.-244    	; 0x56 <delay_ms>
+    //        ||||MUX3        - таблица 2
+    //        |||||MUX2       - таблица 2
+    //        ||||||MUX1      - таблица 2
+    //        |||||||MUX0     - таблица 2
+    //        ||||||||
+    ADMUX = 0b00100000 | (src & 0b00001111);
+ 14a:	b7 b8       	out	0x07, r11	; 7
+    //         ||||ADIE       - разрешение прерывания от компаратора
+    //         |||||ADPS2     - настройка пределителя (влияет на время измерения)
+    //         ||||||ADPS1    -
+    //         |||||||ADPS0   -
+    //         ||||||||
+    ADCSRA = 0b10000111;
+ 14c:	c6 b8       	out	0x06, r12	; 6
+}
+
+inline int ReadADC(int number_of_port) {
+    SetupADMUX(number_of_port);
+    SetupADCSRA();
+    ADCSRA |= (1 << ADSC);          // начали измерение
+ 14e:	36 9a       	sbi	0x06, 6	; 6
+    while(ADCSRA & (1 << ADSC));    // ждем когда помереет
+ 150:	36 99       	sbic	0x06, 6	; 6
+ 152:	fe cf       	rjmp	.-4      	; 0x150 <__DATA_REGION_LENGTH__+0x50>
+    int result = ADCH;              // отбросили шумные незначащие биты
+ 154:	85 b1       	in	r24, 0x05	; 5
+    ADCSRA = 0b00000111;            // выключили АЦП
+ 156:	d6 b8       	out	0x06, r13	; 6
+
+inline int ReadWater() {
+    PB2_HIGH;
+    delay_ms(MEASUREMENT_TIME);
+    int result = ReadADC(2);
+    PB2_LOW;
+ 158:	c2 98       	cbi	0x18, 2	; 24
+ 15a:	90 e0       	ldi	r25, 0x00	; 0
+ 15c:	84 36       	cpi	r24, 0x64	; 100
+ 15e:	91 05       	cpc	r25, r1
+ 160:	74 f0       	brlt	.+28     	; 0x17e <__stack+0x1f>
+ 162:	25 c0       	rjmp	.+74     	; 0x1ae <__stack+0x4f>
+inline void highChirp(int intensity, int chirpsNumber) {
+    for(int veces = 0; veces <= chirpsNumber; veces++) {
+        for (int i = 100; i > 0; i--) {
+            for  (int x = 0; x < intensity;  x++) {
+                PB1_HIGH;
+ 164:	c1 9a       	sbi	0x18, 1	; 24
+                delay_us(i);
+ 166:	ce 01       	movw	r24, r28
+ 168:	81 df       	rcall	.-254    	; 0x6c <delay_us>
+                PB1_LOW;
+ 16a:	c1 98       	cbi	0x18, 1	; 24
+                delay_us(i);
+ 16c:	ce 01       	movw	r24, r28
+ 16e:	7e df       	rcall	.-260    	; 0x6c <delay_us>
+inline void highChirp(int intensity, int chirpsNumber) {
+    for(int veces = 0; veces <= chirpsNumber; veces++) {
+        for (int i = 100; i > 0; i--) {
+ 170:	21 97       	sbiw	r28, 0x01	; 1
+ 172:	c1 f7       	brne	.-16     	; 0x164 <__stack+0x5>
+ 174:	81 e0       	ldi	r24, 0x01	; 1
+ 176:	e8 1a       	sub	r14, r24
+ 178:	f1 08       	sbc	r15, r1
+inline void highChirp(int intensity, int chirpsNumber) {
+    for(int veces = 0; veces <= chirpsNumber; veces++) {
+ 17a:	31 f4       	brne	.+12     	; 0x188 <__stack+0x29>
+ 17c:	08 c0       	rjmp	.+16     	; 0x18e <__stack+0x2f>
+ 17e:	0f 2e       	mov	r0, r31
+ 180:	f5 e0       	ldi	r31, 0x05	; 5
+ 182:	ef 2e       	mov	r14, r31
+ 184:	f1 2c       	mov	r15, r1
+ 186:	f0 2d       	mov	r31, r0
+ 188:	c4 e6       	ldi	r28, 0x64	; 100
+ 18a:	d0 e0       	ldi	r29, 0x00	; 0
+ 18c:	eb cf       	rjmp	.-42     	; 0x164 <__stack+0x5>
+ 18e:	c0 e5       	ldi	r28, 0x50	; 80
+ 190:	d0 e0       	ldi	r29, 0x00	; 0
+    //normal chirpsNumber 3, normal intensity 5
+    for(int veces = 0; veces < chirpsNumber; veces++) {
+
+        for (int i = 80; i > 0; i--) {
+            for  (int x = 0; x < intensity;  x++) {
+                PB1_HIGH;
+ 192:	c1 9a       	sbi	0x18, 1	; 24
+                delay_us(i);
+ 194:	ce 01       	movw	r24, r28
+ 196:	6a df       	rcall	.-300    	; 0x6c <delay_us>
+                PB1_LOW;
+ 198:	c1 98       	cbi	0x18, 1	; 24
+                delay_us(i);
+ 19a:	ce 01       	movw	r24, r28
+ 19c:	67 df       	rcall	.-306    	; 0x6c <delay_us>
+    //normal chirpsNumber 3, normal intensity 5
+    for(int veces = 0; veces < chirpsNumber; veces++) {
+
+        for (int i = 80; i > 0; i--) {
+            for  (int x = 0; x < intensity;  x++) {
+                PB1_HIGH;
+ 19e:	c1 9a       	sbi	0x18, 1	; 24
+                delay_us(i);
+ 1a0:	ce 01       	movw	r24, r28
+ 1a2:	64 df       	rcall	.-312    	; 0x6c <delay_us>
+                PB1_LOW;
+ 1a4:	c1 98       	cbi	0x18, 1	; 24
+                delay_us(i);
+ 1a6:	ce 01       	movw	r24, r28
+ 1a8:	61 df       	rcall	.-318    	; 0x6c <delay_us>
+
+inline void tweet(int intensity, int chirpsNumber) {
+    //normal chirpsNumber 3, normal intensity 5
+    for(int veces = 0; veces < chirpsNumber; veces++) {
+
+        for (int i = 80; i > 0; i--) {
+ 1aa:	21 97       	sbiw	r28, 0x01	; 1
+ 1ac:	91 f7       	brne	.-28     	; 0x192 <__stack+0x33>
+			alarmSound();
+		}
+		delay_ms(1000);
+ 1ae:	88 ee       	ldi	r24, 0xE8	; 232
+ 1b0:	93 e0       	ldi	r25, 0x03	; 3
+ 1b2:	51 df       	rcall	.-350    	; 0x56 <delay_ms>
+ 1b4:	01 50       	subi	r16, 0x01	; 1
+ 1b6:	11 09       	sbc	r17, r1
+	for(int i = 0; i <= 3; i++){
+		tweet(5, 3);
+		delay_ms(500);
+	}
+	
+	for(int i = 0; i <= 60; i++){
+ 1b8:	09 f0       	breq	.+2      	; 0x1bc <__stack+0x5d>
+ 1ba:	b3 cf       	rjmp	.-154    	; 0x122 <__DATA_REGION_LENGTH__+0x22>
+			alarmSound();
+		}
+		delay_ms(1000);
+	}
+	
 	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-  8e:	85 b7       	in	r24, 0x35	; 53
-  90:	87 7e       	andi	r24, 0xE7	; 231
-  92:	80 61       	ori	r24, 0x10	; 16
-  94:	85 bf       	out	0x35, r24	; 53
+ 1bc:	85 b7       	in	r24, 0x35	; 53
+ 1be:	87 7e       	andi	r24, 0xE7	; 231
+ 1c0:	80 61       	ori	r24, 0x10	; 16
+ 1c2:	85 bf       	out	0x35, r24	; 53
+    //        ||||MUX3        - таблица 2
+    //        |||||MUX2       - таблица 2
+    //        ||||||MUX1      - таблица 2
+    //        |||||||MUX0     - таблица 2
+    //        ||||||||
+    ADMUX = 0b00100000 | (src & 0b00001111);
+ 1c4:	0f 2e       	mov	r0, r31
+ 1c6:	f3 e2       	ldi	r31, 0x23	; 35
+ 1c8:	ff 2e       	mov	r15, r31
+ 1ca:	f0 2d       	mov	r31, r0
+    //         ||||ADIE       - разрешение прерывания от компаратора
+    //         |||||ADPS2     - настройка пределителя (влияет на время измерения)
+    //         ||||||ADPS1    -
+    //         |||||||ADPS0   -
+    //         ||||||||
+    ADCSRA = 0b10000111;
+ 1cc:	07 e8       	ldi	r16, 0x87	; 135
+    SetupADMUX(number_of_port);
+    SetupADCSRA();
+    ADCSRA |= (1 << ADSC);          // начали измерение
+    while(ADCSRA & (1 << ADSC));    // ждем когда помереет
+    int result = ADCH;              // отбросили шумные незначащие биты
+    ADCSRA = 0b00000111;            // выключили АЦП
+ 1ce:	17 e0       	ldi	r17, 0x07	; 7
+    //        ||||MUX3        - таблица 2
+    //        |||||MUX2       - таблица 2
+    //        ||||||MUX1      - таблица 2
+    //        |||||||MUX0     - таблица 2
+    //        ||||||||
+    ADMUX = 0b00100000 | (src & 0b00001111);
+ 1d0:	0f 2e       	mov	r0, r31
+ 1d2:	f2 e2       	ldi	r31, 0x22	; 34
+ 1d4:	ef 2e       	mov	r14, r31
+ 1d6:	f0 2d       	mov	r31, r0
 	
 	while (1) {
 		if (interruptFlug >= realSurvey){
-  96:	80 91 60 00 	lds	r24, 0x0060	; 0x800060 <__data_end>
-  9a:	90 91 61 00 	lds	r25, 0x0061	; 0x800061 <__data_end+0x1>
-  9e:	0a 97       	sbiw	r24, 0x0a	; 10
-  a0:	24 f0       	brlt	.+8      	; 0xaa <main+0x26>
-			
+ 1d8:	80 91 60 00 	lds	r24, 0x0060	; 0x800060 <__DATA_REGION_ORIGIN__>
+ 1dc:	90 91 61 00 	lds	r25, 0x0061	; 0x800061 <__DATA_REGION_ORIGIN__+0x1>
+ 1e0:	86 39       	cpi	r24, 0x96	; 150
+ 1e2:	91 05       	cpc	r25, r1
+ 1e4:	0c f4       	brge	.+2      	; 0x1e8 <__stack+0x89>
+ 1e6:	4a c0       	rjmp	.+148    	; 0x27c <__stack+0x11d>
 			interruptFlug = 0;
-  a2:	10 92 61 00 	sts	0x0061, r1	; 0x800061 <__data_end+0x1>
-  a6:	10 92 60 00 	sts	0x0060, r1	; 0x800060 <__data_end>
+ 1e8:	10 92 61 00 	sts	0x0061, r1	; 0x800061 <__DATA_REGION_ORIGIN__+0x1>
+ 1ec:	10 92 60 00 	sts	0x0060, r1	; 0x800060 <__DATA_REGION_ORIGIN__>
+    PB2_LOW;
+    return result;
+}
+
+inline int ReadLight() {
+    PB0_HIGH;
+ 1f0:	c0 9a       	sbi	0x18, 0	; 24
+    delay_ms(MEASUREMENT_TIME);
+ 1f2:	84 e6       	ldi	r24, 0x64	; 100
+ 1f4:	90 e0       	ldi	r25, 0x00	; 0
+ 1f6:	2f df       	rcall	.-418    	; 0x56 <delay_ms>
+    //        ||||MUX3        - таблица 2
+    //        |||||MUX2       - таблица 2
+    //        ||||||MUX1      - таблица 2
+    //        |||||||MUX0     - таблица 2
+    //        ||||||||
+    ADMUX = 0b00100000 | (src & 0b00001111);
+ 1f8:	f7 b8       	out	0x07, r15	; 7
+    //         ||||ADIE       - разрешение прерывания от компаратора
+    //         |||||ADPS2     - настройка пределителя (влияет на время измерения)
+    //         ||||||ADPS1    -
+    //         |||||||ADPS0   -
+    //         ||||||||
+    ADCSRA = 0b10000111;
+ 1fa:	06 b9       	out	0x06, r16	; 6
+}
+
+inline int ReadADC(int number_of_port) {
+    SetupADMUX(number_of_port);
+    SetupADCSRA();
+    ADCSRA |= (1 << ADSC);          // начали измерение
+ 1fc:	36 9a       	sbi	0x06, 6	; 6
+    while(ADCSRA & (1 << ADSC));    // ждем когда помереет
+ 1fe:	36 99       	sbic	0x06, 6	; 6
+ 200:	fe cf       	rjmp	.-4      	; 0x1fe <__stack+0x9f>
+    int result = ADCH;              // отбросили шумные незначащие биты
+ 202:	85 b1       	in	r24, 0x05	; 5
+    ADCSRA = 0b00000111;            // выключили АЦП
+ 204:	16 b9       	out	0x06, r17	; 6
+
+inline int ReadLight() {
+    PB0_HIGH;
+    delay_ms(MEASUREMENT_TIME);
+    int result = ReadADC(3);
+    PB0_LOW;
+ 206:	c0 98       	cbi	0x18, 0	; 24
+	WDTCR = 0b01110001;
+	sei();
+}
+
+inline void DoCode(){
+	if ((ReadLight() > 100) && (ReadWater() < 100)){
+ 208:	90 e0       	ldi	r25, 0x00	; 0
+ 20a:	85 36       	cpi	r24, 0x65	; 101
+ 20c:	91 05       	cpc	r25, r1
+ 20e:	b4 f1       	brlt	.+108    	; 0x27c <__stack+0x11d>
+    ADCSRA = 0b00000111;            // выключили АЦП
+    return result;
+}
+
+inline int ReadWater() {
+    PB2_HIGH;
+ 210:	c2 9a       	sbi	0x18, 2	; 24
+    delay_ms(MEASUREMENT_TIME);
+ 212:	84 e6       	ldi	r24, 0x64	; 100
+ 214:	90 e0       	ldi	r25, 0x00	; 0
+ 216:	1f df       	rcall	.-450    	; 0x56 <delay_ms>
+    //        ||||MUX3        - таблица 2
+    //        |||||MUX2       - таблица 2
+    //        ||||||MUX1      - таблица 2
+    //        |||||||MUX0     - таблица 2
+    //        ||||||||
+    ADMUX = 0b00100000 | (src & 0b00001111);
+ 218:	e7 b8       	out	0x07, r14	; 7
+    //         ||||ADIE       - разрешение прерывания от компаратора
+    //         |||||ADPS2     - настройка пределителя (влияет на время измерения)
+    //         ||||||ADPS1    -
+    //         |||||||ADPS0   -
+    //         ||||||||
+    ADCSRA = 0b10000111;
+ 21a:	06 b9       	out	0x06, r16	; 6
+}
+
+inline int ReadADC(int number_of_port) {
+    SetupADMUX(number_of_port);
+    SetupADCSRA();
+    ADCSRA |= (1 << ADSC);          // начали измерение
+ 21c:	36 9a       	sbi	0x06, 6	; 6
+    while(ADCSRA & (1 << ADSC));    // ждем когда помереет
+ 21e:	36 99       	sbic	0x06, 6	; 6
+ 220:	fe cf       	rjmp	.-4      	; 0x21e <__stack+0xbf>
+    int result = ADCH;              // отбросили шумные незначащие биты
+ 222:	85 b1       	in	r24, 0x05	; 5
+    ADCSRA = 0b00000111;            // выключили АЦП
+ 224:	16 b9       	out	0x06, r17	; 6
+
+inline int ReadWater() {
+    PB2_HIGH;
+    delay_ms(MEASUREMENT_TIME);
+    int result = ReadADC(2);
+    PB2_LOW;
+ 226:	c2 98       	cbi	0x18, 2	; 24
+ 228:	90 e0       	ldi	r25, 0x00	; 0
+ 22a:	84 36       	cpi	r24, 0x64	; 100
+ 22c:	91 05       	cpc	r25, r1
+ 22e:	74 f0       	brlt	.+28     	; 0x24c <__stack+0xed>
+ 230:	25 c0       	rjmp	.+74     	; 0x27c <__stack+0x11d>
+inline void highChirp(int intensity, int chirpsNumber) {
+    for(int veces = 0; veces <= chirpsNumber; veces++) {
+        for (int i = 100; i > 0; i--) {
+            for  (int x = 0; x < intensity;  x++) {
+                PB1_HIGH;
+ 232:	c1 9a       	sbi	0x18, 1	; 24
+                delay_us(i);
+ 234:	ce 01       	movw	r24, r28
+ 236:	1a df       	rcall	.-460    	; 0x6c <delay_us>
+                PB1_LOW;
+ 238:	c1 98       	cbi	0x18, 1	; 24
+                delay_us(i);
+ 23a:	ce 01       	movw	r24, r28
+ 23c:	17 df       	rcall	.-466    	; 0x6c <delay_us>
+inline void highChirp(int intensity, int chirpsNumber) {
+    for(int veces = 0; veces <= chirpsNumber; veces++) {
+        for (int i = 100; i > 0; i--) {
+ 23e:	21 97       	sbiw	r28, 0x01	; 1
+ 240:	c1 f7       	brne	.-16     	; 0x232 <__stack+0xd3>
+ 242:	81 e0       	ldi	r24, 0x01	; 1
+ 244:	c8 1a       	sub	r12, r24
+ 246:	d1 08       	sbc	r13, r1
+inline void highChirp(int intensity, int chirpsNumber) {
+    for(int veces = 0; veces <= chirpsNumber; veces++) {
+ 248:	31 f4       	brne	.+12     	; 0x256 <__stack+0xf7>
+ 24a:	08 c0       	rjmp	.+16     	; 0x25c <__stack+0xfd>
+ 24c:	0f 2e       	mov	r0, r31
+ 24e:	f5 e0       	ldi	r31, 0x05	; 5
+ 250:	cf 2e       	mov	r12, r31
+ 252:	d1 2c       	mov	r13, r1
+ 254:	f0 2d       	mov	r31, r0
+ 256:	c4 e6       	ldi	r28, 0x64	; 100
+ 258:	d0 e0       	ldi	r29, 0x00	; 0
+ 25a:	eb cf       	rjmp	.-42     	; 0x232 <__stack+0xd3>
+ 25c:	c0 e5       	ldi	r28, 0x50	; 80
+ 25e:	d0 e0       	ldi	r29, 0x00	; 0
+    //normal chirpsNumber 3, normal intensity 5
+    for(int veces = 0; veces < chirpsNumber; veces++) {
+
+        for (int i = 80; i > 0; i--) {
+            for  (int x = 0; x < intensity;  x++) {
+                PB1_HIGH;
+ 260:	c1 9a       	sbi	0x18, 1	; 24
+                delay_us(i);
+ 262:	ce 01       	movw	r24, r28
+ 264:	03 df       	rcall	.-506    	; 0x6c <delay_us>
+                PB1_LOW;
+ 266:	c1 98       	cbi	0x18, 1	; 24
+                delay_us(i);
+ 268:	ce 01       	movw	r24, r28
+ 26a:	00 df       	rcall	.-512    	; 0x6c <delay_us>
+    //normal chirpsNumber 3, normal intensity 5
+    for(int veces = 0; veces < chirpsNumber; veces++) {
+
+        for (int i = 80; i > 0; i--) {
+            for  (int x = 0; x < intensity;  x++) {
+                PB1_HIGH;
+ 26c:	c1 9a       	sbi	0x18, 1	; 24
+                delay_us(i);
+ 26e:	ce 01       	movw	r24, r28
+ 270:	fd de       	rcall	.-518    	; 0x6c <delay_us>
+                PB1_LOW;
+ 272:	c1 98       	cbi	0x18, 1	; 24
+                delay_us(i);
+ 274:	ce 01       	movw	r24, r28
+ 276:	fa de       	rcall	.-524    	; 0x6c <delay_us>
+
+inline void tweet(int intensity, int chirpsNumber) {
+    //normal chirpsNumber 3, normal intensity 5
+    for(int veces = 0; veces < chirpsNumber; veces++) {
+
+        for (int i = 80; i > 0; i--) {
+ 278:	21 97       	sbiw	r28, 0x01	; 1
+ 27a:	91 f7       	brne	.-28     	; 0x260 <__stack+0x101>
+	while (1) {
+		if (interruptFlug >= realSurvey){
+			interruptFlug = 0;
+			DoCode();
 		}
 		sleep_mode();
-  aa:	85 b7       	in	r24, 0x35	; 53
-  ac:	80 62       	ori	r24, 0x20	; 32
-  ae:	85 bf       	out	0x35, r24	; 53
-  b0:	88 95       	sleep
-  b2:	85 b7       	in	r24, 0x35	; 53
-  b4:	8f 7d       	andi	r24, 0xDF	; 223
-  b6:	85 bf       	out	0x35, r24	; 53
+ 27c:	85 b7       	in	r24, 0x35	; 53
+ 27e:	80 62       	ori	r24, 0x20	; 32
+ 280:	85 bf       	out	0x35, r24	; 53
+ 282:	88 95       	sleep
+ 284:	85 b7       	in	r24, 0x35	; 53
+ 286:	8f 7d       	andi	r24, 0xDF	; 223
+ 288:	85 bf       	out	0x35, r24	; 53
 	}
-  b8:	ee cf       	rjmp	.-36     	; 0x96 <main+0x12>
+ 28a:	a6 cf       	rjmp	.-180    	; 0x1d8 <__stack+0x79>
 
-000000ba <_exit>:
-  ba:	f8 94       	cli
+0000028c <_exit>:
+ 28c:	f8 94       	cli
 
-000000bc <__stop_program>:
-  bc:	ff cf       	rjmp	.-2      	; 0xbc <__stop_program>
+0000028e <__stop_program>:
+ 28e:	ff cf       	rjmp	.-2      	; 0x28e <__stop_program>
